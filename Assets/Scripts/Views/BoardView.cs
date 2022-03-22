@@ -1,5 +1,6 @@
 namespace Views
 {
+    using System;
     using Client;
     using Configs;
     using UnityEngine;
@@ -15,7 +16,7 @@ namespace Views
             _config = config;
         }
 
-        public void FillBoard(Cell[,] board)
+        public void FillBoard(Cell[,] board, Action<Vector2Int> cellButtonClickHandler)
         {
             _cells = new CellView[board.GetLength(0), board.GetLength(1)];
 
@@ -35,7 +36,9 @@ namespace Views
 
                     var cellView = Instantiate(_config.CellPrefab, row.transform);
                     cellView.Icon.sprite = cell.Config.Icon;
+                    cellView.AddButtonHandler(()=>cellButtonClickHandler.Invoke(cell.Coords));
                     cell.SetView(cellView);
+                    
                 }
             }
         }

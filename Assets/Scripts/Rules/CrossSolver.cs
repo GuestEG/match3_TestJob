@@ -61,6 +61,11 @@ namespace Rules
 		public override List<Cell> GetConnectedCells(Cell[,] board, Vector2Int cellCoords)
 		{
 			_connected.Clear();
+			//immdiately return on empty cell
+			if (board[cellCoords.x, cellCoords.y].IsEmpty)
+			{
+				return null;
+			}
 
 			_connected = GetChainHorizontal(board, cellCoords);
 			if (_connected.Count >= minimalChainLength)
@@ -84,41 +89,34 @@ namespace Rules
 			var sizeY = board.GetLength(1);
 			_result.Add(sampleCell);
 			
-			var checkCoords = cellCoords;
 			//move up
+			var checkCoords = cellCoords;
 			checkCoords.y--;
 			while (checkCoords.y >= 0)
 			{
 				var checkCell = board[checkCoords.x, checkCoords.y];
-				if (checkCell != null
-				    && checkCell.Config == sampleCell.Config)
+				if (checkCell.IsEmpty || checkCell.Config != sampleCell.Config)
 				{
-					_result.Add(checkCell);
-					checkCoords.y--;
-				}
-				else
-				{
-					//end of chain
 					break;
 				}
+
+				_result.Add(checkCell);
+				checkCoords.y--;
 			}
+
 			//move down
 			checkCoords = cellCoords;
 			checkCoords.y++;
 			while (checkCoords.y < sizeY)
 			{
 				var checkCell = board[checkCoords.x, checkCoords.y];
-				if (checkCell != null
-				    && checkCell.Config == sampleCell.Config)
+				if (checkCell == null || checkCell.Config != sampleCell.Config)
 				{
-					_result.Add(checkCell);
-					checkCoords.y++;
-				}
-				else
-				{
-					//end of chain
 					break;
 				}
+
+				_result.Add(checkCell);
+				checkCoords.y++;
 			}
 			Debug.Log($"Found {_result.Count} vertical chain");
 			return _result;
@@ -133,40 +131,34 @@ namespace Rules
 			_result.Add(sampleCell);
 
 			var checkCoords = cellCoords;
+
 			//move left
 			checkCoords.x--;
 			while (checkCoords.x >= 0)
 			{
 				var checkCell = board[checkCoords.x, checkCoords.y];
-				if (checkCell != null
-				    && checkCell.Config == sampleCell.Config)
+				if (checkCell == null || checkCell.Config != sampleCell.Config)
 				{
-					_result.Add(checkCell);
-					checkCoords.y--;
-				}
-				else
-				{
-					//end of chain
 					break;
 				}
+
+				_result.Add(checkCell);
+				checkCoords.x--;
 			}
+
 			//move right
 			checkCoords = cellCoords;
 			checkCoords.x++;
 			while (checkCoords.x < sizeX)
 			{
 				var checkCell = board[checkCoords.x, checkCoords.y];
-				if (checkCell != null
-				    && checkCell.Config == sampleCell.Config)
+				if (checkCell == null || checkCell.Config != sampleCell.Config)
 				{
-					_result.Add(checkCell);
-					checkCoords.x++;
-				}
-				else
-				{
-					//end of chain
 					break;
 				}
+
+				_result.Add(checkCell);
+				checkCoords.x++;
 			}
 			Debug.Log($"Found {_result.Count} horizontal chain");
 			return _result;
