@@ -23,7 +23,9 @@ namespace Rules
 				var rndY = Random.Range(0, sizeY);
 				if (result[rndX, rndY] == null)
 				{
-					result[rndX, rndY] = new Cell(true, new Vector2Int(rndX, rndY), null);
+					var cell = new Cell();
+					cell.Coords = new Vector2Int(rndX, rndY);
+					result[rndX, rndY] = cell;
 					emptyCells--;
 				}
 			}
@@ -32,14 +34,18 @@ namespace Rules
 			{
 				for (int x = 0; x < sizeX; x++)
 				{
-					//check for prefilled empties
+					//skip prefilled empties
 					if (result[x, y] != null)
 					{
 						continue;
 					}
 
 					var randomCellConfig = config.CellConfigs[Random.Range(0, config.CellConfigs.Count)];
-					result[x, y] = new Cell(false, new Vector2Int(x, y), randomCellConfig);
+					var cell = new Cell();
+					cell.Config = randomCellConfig;
+					cell.Coords = new Vector2Int(x, y);
+
+					result[x, y] = cell;
 				}
 			}
 

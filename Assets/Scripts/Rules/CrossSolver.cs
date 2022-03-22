@@ -58,11 +58,11 @@ namespace Rules
 		// }
 
 		
-		public override List<Cell> GetConnectedCells(Cell[,] board, Vector2Int cellCoords)
+		public override List<Cell> GetConnectedCells(Board board, Vector2Int cellCoords)
 		{
 			_connected.Clear();
 			//immdiately return on empty cell
-			if (board[cellCoords.x, cellCoords.y].IsEmpty)
+			if (board.GetCell(cellCoords).IsEmpty)
 			{
 				return null;
 			}
@@ -82,11 +82,11 @@ namespace Rules
 			return null;
 		}
 
-		private List<Cell> GetChainVertical(Cell[,] board, Vector2Int cellCoords)
+		private List<Cell> GetChainVertical(Board board, Vector2Int cellCoords)
 		{
 			_result.Clear();
-			var sampleCell = board[cellCoords.x, cellCoords.y];
-			var sizeY = board.GetLength(1);
+			var sampleCell = board.GetCell(cellCoords);
+			var sizeY = board.Size.y;
 			_result.Add(sampleCell);
 			
 			//move up
@@ -94,7 +94,7 @@ namespace Rules
 			checkCoords.y--;
 			while (checkCoords.y >= 0)
 			{
-				var checkCell = board[checkCoords.x, checkCoords.y];
+				var checkCell = board.GetCell(checkCoords);
 				if (checkCell.IsEmpty || checkCell.Config != sampleCell.Config)
 				{
 					break;
@@ -109,7 +109,7 @@ namespace Rules
 			checkCoords.y++;
 			while (checkCoords.y < sizeY)
 			{
-				var checkCell = board[checkCoords.x, checkCoords.y];
+				var checkCell = board.GetCell(checkCoords);
 				if (checkCell == null || checkCell.Config != sampleCell.Config)
 				{
 					break;
@@ -122,12 +122,12 @@ namespace Rules
 			return _result;
 		}
 
-		private List<Cell> GetChainHorizontal(Cell[,] board, Vector2Int cellCoords)
+		private List<Cell> GetChainHorizontal(Board board, Vector2Int cellCoords)
 		{
 			_result.Clear();
 
-			var sampleCell = board[cellCoords.x, cellCoords.y];
-			var sizeX = board.GetLength(0);
+			var sampleCell = board.GetCell(cellCoords);
+			var sizeX = board.Size.x;
 			_result.Add(sampleCell);
 
 			var checkCoords = cellCoords;
@@ -136,7 +136,7 @@ namespace Rules
 			checkCoords.x--;
 			while (checkCoords.x >= 0)
 			{
-				var checkCell = board[checkCoords.x, checkCoords.y];
+				var checkCell = board.GetCell(checkCoords);
 				if (checkCell == null || checkCell.Config != sampleCell.Config)
 				{
 					break;
@@ -151,7 +151,7 @@ namespace Rules
 			checkCoords.x++;
 			while (checkCoords.x < sizeX)
 			{
-				var checkCell = board[checkCoords.x, checkCoords.y];
+				var checkCell = board.GetCell(checkCoords);
 				if (checkCell == null || checkCell.Config != sampleCell.Config)
 				{
 					break;

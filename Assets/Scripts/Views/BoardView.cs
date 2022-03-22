@@ -16,16 +16,16 @@ namespace Views
             _config = config;
         }
 
-        public void FillBoard(Cell[,] board, Action<Vector2Int> cellButtonClickHandler)
+        public void FillBoard(Board board, Action<Vector2Int> cellButtonClickHandler)
         {
-            _cells = new CellView[board.GetLength(0), board.GetLength(1)];
+            _cells = new CellView[board.Size.x, board.Size.y];
 
-            for (int y = 0; y < board.GetLength(1); y++)
+            for (int y = 0; y < board.Size.y; y++)
             {
                 var row = Instantiate(_config.RowPrefab, this.transform);
-                for (int x = 0; x < board.GetLength(0); x++)
+                for (int x = 0; x < board.Size.x; x++)
                 {
-                    var cell = board[x, y];
+                    var cell = board.GetCell(x, y);
 
                     if (cell.IsEmpty)
                     {
@@ -35,10 +35,13 @@ namespace Views
                     }
 
                     var cellView = Instantiate(_config.CellPrefab, row.transform);
+                    cellView.name = $"Cell {x},{y}";
                     cellView.Icon.sprite = cell.Config.Icon;
-                    cellView.AddButtonHandler(()=>cellButtonClickHandler.Invoke(cell.Coords));
-                    cell.SetView(cellView);
+
+                    cellView.AddButtonHandler(() => cellButtonClickHandler.Invoke(cell.Coords));
                     
+                    cell.View = cellView;
+
                 }
             }
         }
