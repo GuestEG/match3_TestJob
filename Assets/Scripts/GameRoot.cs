@@ -1,5 +1,6 @@
 namespace Composition
 {
+    using System;
     using Client;
     using Configs;
     using UnityEngine;
@@ -11,9 +12,14 @@ namespace Composition
         
         private Game _game;
 
-        private void Start()
+        private void Awake()
         {
             _game = new Game(_board, _config);
+        }
+
+        private void Start()
+        {
+            _game.StartGame();
         }
 
         private void OnDestroy()
