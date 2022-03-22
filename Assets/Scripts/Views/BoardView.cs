@@ -34,7 +34,7 @@ namespace Views
                     }
 
                     var cellView = Instantiate(_config.CellPrefab, row.transform);
-                    cellView.GetIcon().sprite = cell.Config.Icon;
+                    cellView.Icon.sprite = cell.Config.Icon;
                     cell.SetView(cellView);
                 }
             }

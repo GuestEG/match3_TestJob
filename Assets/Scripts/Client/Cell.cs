@@ -6,23 +6,21 @@ namespace Client
 
 	public sealed class Cell
 	{
-		public CellView _view { get; private set; }
+		public CellView View { get; private set; }
 		public CellConfig Config { get; }
 		public bool IsEmpty { get; }
-
-
-		private Vector2Int _coords; //do i need this?
+		public Vector2Int Coords { get; } //do i need this?
 		
 		public Cell(bool isEmpty, Vector2Int coords, CellConfig config)
 		{
 			IsEmpty = isEmpty;
-			_coords = coords;
+			Coords = coords;
 			Config = config;
 		}
 
 		public void SetView(CellView view)
 		{
-			_view = view;
+			View = view;
 		}
 	}
 }
