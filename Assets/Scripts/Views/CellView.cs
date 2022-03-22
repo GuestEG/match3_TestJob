@@ -12,6 +12,11 @@ namespace Views
 
         public Image GetIcon() => _icon;
 
+        private void Start()
+        {
+            ShowHighlight(false);
+        }
+
         public void ShowHighlight(bool show)
         {
             _highlight.gameObject.SetActive(show);
