@@ -1,6 +1,7 @@
 namespace Client
 {
 	using Configs;
+	using Views;
 
 	public sealed class Game
 	{
@@ -12,6 +13,7 @@ namespace Client
 		public Game(BoardView view, GameConfig config)
 		{
 			_view = view;
+			_view.SetConfig(config.BoardConfig);
 			_config = config;
 		}
 
@@ -20,15 +22,15 @@ namespace Client
 			FillBoard();
 			FillBoardView();
 		}
-
-		private void FillBoardView()
-		{
-			throw new System.NotImplementedException();
-		}
-
+		
 		private void FillBoard()
 		{
 			_board = _config.BoardFillRule.FillBoard(_config.BoardConfig);
+		}
+
+		private void FillBoardView()
+		{
+			_view.FillBoard(_board);
 		}
 	}
 }

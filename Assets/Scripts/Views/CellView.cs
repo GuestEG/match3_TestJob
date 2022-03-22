@@ -10,7 +10,6 @@ namespace Views
         [SerializeField] private Image _highlight;
         [SerializeField] private Image _icon;
 
-        public Transform GetTransform() => this.transform;
         public Image GetIcon() => _icon;
 
         public void ShowHighlight(bool show)
@@ -18,7 +17,7 @@ namespace Views
             _highlight.gameObject.SetActive(show);
         }
 
-        public void AddHandler(Action OnButtonClick)
+        public void AddButtonHandler(Action OnButtonClick)
         {
             _button.onClick.AddListener(()=>OnButtonClick.Invoke());
         }

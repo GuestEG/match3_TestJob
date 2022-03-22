@@ -1,9 +1,9 @@
 namespace Composition
 {
-    using System;
     using Client;
     using Configs;
     using UnityEngine;
+    using Views;
 
     public sealed class GameRoot : MonoBehaviour
     {
