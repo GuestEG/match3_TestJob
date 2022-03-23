@@ -7,16 +7,16 @@ namespace Client
 	public sealed class Game
 	{
 		private readonly GameConfig _config;
-		private readonly BoardView _view;
+		private readonly BoardView _boardView;
 		
 		private bool _inputBlocked = false;
 		private Board _board;
 		private Cell _selection = null;
 
-		public Game(BoardView view, GameConfig config)
+		public Game(BoardView boardView, GameConfig config)
 		{
-			_view = view;
-			_view.SetConfig(config.BoardConfig);
+			_boardView = boardView;
+			_boardView.SetConfig(config.BoardConfig);
 			_config = config;
 		}
 
@@ -29,7 +29,7 @@ namespace Client
 		
 		public void FillBoardView()
 		{
-			_view.FillBoard(_board, CellButtonClickHandler);
+			_boardView.FillBoard(_board, CellButtonClickHandler);
 		}
 
 		private async void CellButtonClickHandler(Vector2Int cellPosition)
@@ -44,7 +44,8 @@ namespace Client
 			if(_selection == null)
 			{
 				_selection = _board.GetCell(cellPosition);
-				_selection.View.ShowHighlight(true);
+				_boardView.ShowHighlight(cellPosition, true);
+				
 				return;
 			}
 
@@ -59,8 +60,11 @@ namespace Client
 			if (Mathf.Approximately(Vector2Int.Distance(_selection.Coords, cellPosition), 1))
 			{
 				_inputBlocked = true;
-				_selection.View.ShowHighlight(false);
+				_boardView.ShowHighlight(_selection.Coords, false);
 				_board.SwapCells(_selection.Coords, cellPosition);
+				//animate movement
+				await _boardView.SwapIcons(_selection.Coords, cellPosition, _config.SwapAnimationDuration);
+
 				_selection = null;
 				_inputBlocked = false;
 				Debug.Log("Swap completed");
@@ -68,9 +72,9 @@ namespace Client
 			}
 
 			//too far - switch selection
-			_selection.View.ShowHighlight(false);
+			_boardView.ShowHighlight(_selection.Coords, false);
 			_selection = _board.GetCell(cellPosition);
-			_selection.View.ShowHighlight(true);
+			_boardView.ShowHighlight(_selection.Coords, true);
 			return;
 
 
@@ -94,7 +98,5 @@ namespace Client
 			// 	Debug.Log("Sequence completed");
 			// }
 		}
-
-		
 	}
 }

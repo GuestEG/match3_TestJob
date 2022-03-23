@@ -6,6 +6,8 @@ namespace Configs
     [CreateAssetMenu(menuName = "SWG/GameConfig")]
     public sealed class GameConfig : ScriptableObject
     {
+        public float SwapAnimationDuration = 0.5f;
+
         [Header("Configs")]
         public BoardConfig BoardConfig;
 

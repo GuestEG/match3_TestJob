@@ -56,7 +56,6 @@ namespace Rules
 		//
 		// 	return _neighbors;
 		// }
-
 		
 		public override List<Cell> GetConnectedCells(Board board, Vector2Int cellCoords)
 		{

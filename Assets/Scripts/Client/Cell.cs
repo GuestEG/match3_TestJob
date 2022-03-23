@@ -6,7 +6,7 @@ namespace Client
 
 	public sealed class Cell
 	{
-		public CellView View { get; set; }
+		public CellView View { private get; set; }
 		public CellConfig Config { get; set; }
 		public bool IsEmpty => Config == null;
 		public Vector2Int Coords { get; set; }
