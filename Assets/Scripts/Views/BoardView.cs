@@ -1,43 +1,73 @@
 namespace Views
 {
+    using System;
+    using System.Threading.Tasks;
     using Client;
     using Configs;
+    using DG.Tweening;
     using UnityEngine;
 
     public class BoardView : MonoBehaviour
     {
         private BoardConfig _config;
 
-        private CellView[,] _cells;
+        private CellView[,] _cellViews;
 
         public void SetConfig(BoardConfig config)
         {
             _config = config;
         }
 
-        public void FillBoard(Cell[,] board)
+        public void FillBoard(Board board, Action<Vector2Int> cellButtonClickHandler)
         {
-            _cells = new CellView[board.GetLength(0), board.GetLength(1)];
+            _cellViews = new CellView[board.Size.x, board.Size.y];
 
-            for (int y = 0; y < board.GetLength(1); y++)
+            for (int y = 0; y < board.Size.y; y++)
             {
                 var row = Instantiate(_config.RowPrefab, this.transform);
-                for (int x = 0; x < board.GetLength(0); x++)
+                for (int x = 0; x < board.Size.x; x++)
                 {
-                    var cell = board[x, y];
+                    var cell = board.GetCell(x, y);
 
                     if (cell.IsEmpty)
                     {
-                        _cells[x, y] = null;
+                        _cellViews[x, y] = null;
                         Instantiate(_config.EmptyCellPrefab, row.transform, false);
                         continue;
                     }
 
                     var cellView = Instantiate(_config.CellPrefab, row.transform);
-                    cellView.GetIcon().sprite = cell.Config.Icon;
-                    cell.SetView(cellView);
+                    _cellViews[x, y] = cellView;
+                    cellView.name = $"Cell {x},{y}";
+                    cellView.AddButtonHandler(() => cellButtonClickHandler.Invoke(cell.Coords));
+                    
+                    cell.View = cellView;
+                    cell.UpdateIconFromConfig();
                 }
             }
+        }
+
+        public async Task SwapIcons(Vector2Int positon1, Vector2Int positon2, float duration)
+        {
+            var cell1 = _cellViews[positon1.x, positon1.y];
+            var cell2 = _cellViews[positon2.x, positon2.y];
+            var icon1 = cell1.Icon;
+            var icon2 = cell2.Icon;
+            var icon1dest = icon2.transform.position;
+            var icon2dest = icon1.transform.position;
+
+            var sequence = DOTween.Sequence();
+            //reverse move
+            sequence.Join(icon1.transform.DOMove(icon1dest, duration).From());
+            sequence.Join(icon2.transform.DOMove(icon2dest, duration).From());
+			
+            await sequence.Play().AsyncWaitForCompletion();
+        }
+
+        public void ShowHighlight(Vector2Int cellPosition, bool show)
+        {
+            var cell = _cellViews[cellPosition.x, cellPosition.y];
+            cell.ShowHighlight(show);
         }
     }
 }

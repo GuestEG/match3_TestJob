@@ -6,23 +6,19 @@ namespace Client
 
 	public sealed class Cell
 	{
-		public CellView _view { get; private set; }
-		public CellConfig Config { get; }
-		public bool IsEmpty { get; }
+		public CellView View { private get; set; }
+		public CellConfig Config { get; set; }
+		public bool IsEmpty => Config == null;
+		public Vector2Int Coords { get; set; }
 
-
-		private Vector2Int _coords; //do i need this?
-		
-		public Cell(bool isEmpty, Vector2Int coords, CellConfig config)
+		public void UpdateIconFromConfig()
 		{
-			IsEmpty = isEmpty;
-			_coords = coords;
-			Config = config;
-		}
+			if (View == null)
+			{
+				return;
+			}
 
-		public void SetView(CellView view)
-		{
-			_view = view;
+			View.Icon.sprite = Config.Icon;
 		}
 	}
 }

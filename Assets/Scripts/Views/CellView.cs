@@ -10,7 +10,7 @@ namespace Views
         [SerializeField] private Image _highlight;
         [SerializeField] private Image _icon;
 
-        public Image GetIcon() => _icon;
+        public Image Icon => _icon;
 
         private void Start()
         {
