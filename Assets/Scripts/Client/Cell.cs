@@ -10,5 +10,15 @@ namespace Client
 		public CellConfig Config { get; set; }
 		public bool IsEmpty => Config == null;
 		public Vector2Int Coords { get; set; }
+
+		public void UpdateIconFromConfig()
+		{
+			if (View == null)
+			{
+				return;
+			}
+
+			View.Icon.sprite = Config.Icon;
+		}
 	}
 }

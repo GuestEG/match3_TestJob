@@ -1,8 +1,6 @@
 namespace Client
 {
-	using System.Threading.Tasks;
 	using Configs;
-	using DG.Tweening;
 	using UnityEngine;
 	using Views;
 
@@ -62,7 +60,6 @@ namespace Client
 			{
 				_inputBlocked = true;
 				_selection.View.ShowHighlight(false);
-				await SwapIconPositions(_selection, _board.GetCell(cellPosition), _config.AnimationDuration);
 				_board.SwapCells(_selection.Coords, cellPosition);
 				_selection = null;
 				_inputBlocked = false;
@@ -98,18 +95,6 @@ namespace Client
 			// }
 		}
 
-		private async Task SwapIconPositions(Cell cell1, Cell cell2, float duration)
-		{
-			var icon1 = cell1.View.Icon;
-			var icon2 = cell2.View.Icon;
-
-			var sequence = DOTween.Sequence();
-			sequence.Join(icon1.transform.DOMove(icon2.transform.position, duration));
-			sequence.Join(icon2.transform.DOMove(icon1.transform.position, duration));
-			await sequence.Play().AsyncWaitForCompletion();
-			
-			icon1.transform.SetParent(cell2.View.transform, true);
-			icon2.transform.SetParent(cell1.View.transform, true);
-		}
+		
 	}
 }

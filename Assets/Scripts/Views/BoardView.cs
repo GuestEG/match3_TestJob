@@ -36,12 +36,10 @@ namespace Views
 
                     var cellView = Instantiate(_config.CellPrefab, row.transform);
                     cellView.name = $"Cell {x},{y}";
-                    cellView.Icon.sprite = cell.Config.Icon;
-
                     cellView.AddButtonHandler(() => cellButtonClickHandler.Invoke(cell.Coords));
                     
                     cell.View = cellView;
-
+                    cell.UpdateIconFromConfig();
                 }
             }
         }
