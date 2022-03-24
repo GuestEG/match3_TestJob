@@ -99,7 +99,6 @@ namespace Views
                 });
                 sequence.Join(iconSequence);
             }
-            
             return sequence;
         }
 
@@ -115,7 +114,9 @@ namespace Views
                 if (movement.FromOffscreen)
                 {
                     //take offscreen position
-                    startPosition = targetIcon.transform.position + Vector3.down * rowOffset * movement.Distance;
+                    startPosition = targetIcon.transform.position 
+                                    + Vector3.down * rowOffset * movement.Distance
+                                    + Vector3.right * movement.Start.x;
                 }
                 else
                 {

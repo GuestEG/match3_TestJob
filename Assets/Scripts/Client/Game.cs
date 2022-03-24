@@ -109,11 +109,9 @@ namespace Client
 						var loopSequence = DOTween.Sequence();
 						loopSequence.Join(_boardView.GetPopIconsSequence(solution, _config.PopAnimationDuration));
 						_board.FillBoard(
-							_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig, out movements)
-							);
+							_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig, out movements));
 						loopSequence.Join(
-							_boardView.GetMoveIconsSequence(movements, RowOffset, _config.FillAnimationDuration)
-							);
+							_boardView.GetMoveIconsSequence(movements, RowOffset, _config.FillAnimationDuration));
 						await loopSequence
 							.Play()
 							.AsyncWaitForCompletion();

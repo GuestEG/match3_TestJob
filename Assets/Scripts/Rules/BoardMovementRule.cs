@@ -31,35 +31,56 @@ namespace Rules
 				for (int row = 0; row < rowsNum; row++)
 				{
 					ref var boardCell = ref board[column, row];
+					var lookupOffset = 0;
 					//find a row where a missing piece will be
 					if (!boardCell.IsHole && removedCells.Contains(boardCell))
 					{
 						var filled = false;
 						//now scan downwards until hit a filled or end of the board
-						for (int lookup = row + 1; lookup < rowsNum; lookup++)
+						for (int lookupRow = row + 1; lookupRow < rowsNum; lookupRow++)
 						{
-							var nextCell = board[column, lookup];
-							if (!nextCell.IsHole && !removedCells.Contains(nextCell))
+							var nextCell = board[column + lookupOffset, lookupRow];
+							if (removedCells.Contains(nextCell))
 							{
-								//we found the piece, now we need to put it in the missing spot
-								//board[column, row].Config = nextCell.Config;
-								boardCell.Config = nextCell.Config;
-								//and that cell becomes empty
-								removedCells.Add(nextCell);
-								boardCell.UpdateIconFromConfig();
-								filled = true;
-
-								//create movement for animation
-								var movement = new CellMovement()
-								{
-									End = boardCell.Coords,
-									Start = nextCell.Coords,
-									Distance = nextCell.Coords.y - boardCell.Coords.y
-								};
-								movements.Add(movement);
-
-								break;
+								continue;
 							}
+
+							if (nextCell.IsHole)
+							{
+								//shift lookup sideways
+								if (column < columnsNum - 1)
+								{
+									lookupOffset++;
+								}
+								else
+								{
+									lookupOffset--;
+								}
+
+								//step back
+								lookupRow--;
+								continue;
+							}
+
+							//we found the piece, now we need to put it in the missing spot
+							//board[column, row].Config = nextCell.Config;
+							boardCell.Config = nextCell.Config;
+							//and that cell becomes empty
+							removedCells.Add(nextCell);
+							boardCell.UpdateIconFromConfig();
+							filled = true;
+
+							//create movement for animation
+							var movement = new CellMovement()
+							{
+								End = boardCell.Coords,
+								Start = nextCell.Coords,
+								Distance = nextCell.Coords.y - boardCell.Coords.y + nextCell.Coords.x - boardCell.Coords.x
+								
+							};
+							movements.Add(movement);
+
+							break;
 						}
 						
 						//if we hit bottom line - we'll make a new config instead
@@ -76,6 +97,7 @@ namespace Rules
 							{
 								End = boardCell.Coords,
 								Distance = columnBottom,
+								Start = Vector2Int.right * lookupOffset,
 								FromOffscreen = true
 							};
 							movements.Add(movement);
