@@ -5,7 +5,7 @@ namespace Rules
 	using UnityEngine;
 	using Random = UnityEngine.Random;
 
-	[CreateAssetMenu(menuName = "SWG/NoPopsFillRule")]
+	[CreateAssetMenu(menuName = "Match3Test/NoPopsFillRule")]
 	
 	//This rule generates random board with no immediate solution
 	public sealed class NoPopsFillRule : BoardFillRuleBase
