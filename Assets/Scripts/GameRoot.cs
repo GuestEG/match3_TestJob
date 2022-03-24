@@ -2,6 +2,7 @@ namespace Composition
 {
     using Client;
     using Configs;
+    using Popup;
     using UnityEngine;
     using Views;
 
@@ -9,6 +10,7 @@ namespace Composition
     {
         [SerializeField] private BoardView _boardView;
         [SerializeField] private ScoreView _scoreView;
+        [SerializeField] private ShufflePopup _shufflePopup;
         [SerializeField] private GameConfig _config;
         
         
@@ -16,7 +18,11 @@ namespace Composition
 
         private void Awake()
         {
-            _game = new Game(_boardView, _scoreView, _config);
+            _game = new Game(
+                _boardView, 
+                _scoreView, 
+                _shufflePopup,
+                _config);
         }
 
         private void Start()

@@ -4,6 +4,7 @@ namespace Client
 	using System.Linq;
 	using Configs;
 	using DG.Tweening;
+	using Popup;
 	using UnityEngine;
 	using Views;
 
@@ -12,18 +13,21 @@ namespace Client
 		private readonly GameConfig _config;
 		private readonly BoardView _boardView;
 		private readonly ScoreView _scoreView;
+		private readonly ShufflePopup _shufflePopup;
 		
 		private bool _inputBlocked = false;
 		private Board _board = null;
 		private Cell _selection = null;
 		private int _gameScore = 0;
+
 		private float RowOffset => _boardView.GetRowHeight();
 
-		public Game(BoardView boardView, ScoreView scoreView, GameConfig config)
+		public Game(BoardView boardView, ScoreView scoreView, ShufflePopup shufflePopup, GameConfig config)
 		{
 			_config = config;
 			_boardView = boardView;
 			_scoreView = scoreView;
+			_shufflePopup = shufflePopup;
 			_boardView.SetConfig(config.BoardConfig);
 		}
 
