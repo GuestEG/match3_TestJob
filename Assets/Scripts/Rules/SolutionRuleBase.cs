@@ -8,6 +8,8 @@ namespace Rules
     {
         public abstract bool TryGetConnectedCells(Cell[,] board, Vector2Int cellCoords, out List<Cell> connectedCells);
 
+        public abstract bool HasPotentialSolutions(Cell[,] board, Vector2Int cellCoords);
+
         protected static Cell Top(Cell[,] board, Vector2Int cellCoords)
         {
             if (cellCoords.y <= 0)
@@ -17,7 +19,7 @@ namespace Rules
 
             cellCoords.y -= 1;
             var neighbor = board[cellCoords.x, cellCoords.y];
-            if (neighbor == null || neighbor.IsHole)
+            if (neighbor == null)
             {
                 return null;
             }
@@ -36,7 +38,7 @@ namespace Rules
 
             cellCoords.y += 1;
             var neighbor = board[cellCoords.x, cellCoords.y];
-            if (neighbor == null || neighbor.IsHole)
+            if (neighbor == null)
             {
                 return null;
             }
@@ -53,7 +55,7 @@ namespace Rules
 
             cellCoords.x -= 1;
             var neighbor = board[cellCoords.x, cellCoords.y];
-            if (neighbor == null || neighbor.IsHole)
+            if (neighbor == null)
             {
                 return null;
             }
@@ -71,7 +73,7 @@ namespace Rules
 
             cellCoords.x += 1;
             var neighbor = board[cellCoords.x, cellCoords.y];
-            if (neighbor == null || neighbor.IsHole)
+            if (neighbor == null)
             {
                 return null;
             }

@@ -2,8 +2,10 @@ namespace Client
 {
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Configs;
 	using DG.Tweening;
+	using Popup;
 	using UnityEngine;
 	using Views;
 
@@ -12,18 +14,21 @@ namespace Client
 		private readonly GameConfig _config;
 		private readonly BoardView _boardView;
 		private readonly ScoreView _scoreView;
+		private readonly ShufflePopup _shufflePopup;
 		
 		private bool _inputBlocked = false;
 		private Board _board = null;
 		private Cell _selection = null;
 		private int _gameScore = 0;
+
 		private float RowOffset => _boardView.GetRowHeight();
 
-		public Game(BoardView boardView, ScoreView scoreView, GameConfig config)
+		public Game(BoardView boardView, ScoreView scoreView, ShufflePopup shufflePopup, GameConfig config)
 		{
 			_config = config;
 			_boardView = boardView;
 			_scoreView = scoreView;
+			_shufflePopup = shufflePopup;
 			_boardView.SetConfig(config.BoardConfig);
 		}
 
@@ -85,10 +90,16 @@ namespace Client
 					//pop animation
 					var sequence = _boardView.GetPopIconsSequence(solution, _config.PopAnimationDuration);
 					//replace popped with new ones
-					_board.FillBoard(_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig, out var movements));
+					_board.FillBoard(
+						_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig, out var movements));
+
 					//and animate movement
-					sequence.Join(_boardView.GetMoveIconsSequence(movements, RowOffset, _config.FillAnimationDuration));
-					await sequence.Play().AsyncWaitForCompletion();
+					sequence.Join(
+						_boardView.GetMoveIconsSequence(movements, RowOffset, _config.FillAnimationDuration));
+					await sequence
+						.Play()
+						.AsyncWaitForCompletion();
+
 					//keep trying until stable
 					while (TryGetTotalSolution(_board, out solution))
 					{
@@ -97,9 +108,21 @@ namespace Client
 
 						var loopSequence = DOTween.Sequence();
 						loopSequence.Join(_boardView.GetPopIconsSequence(solution, _config.PopAnimationDuration));
-						_board.FillBoard(_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig, out movements));
-						loopSequence.Join(_boardView.GetMoveIconsSequence(movements, RowOffset, _config.FillAnimationDuration));
-						await loopSequence.Play().AsyncWaitForCompletion();
+						_board.FillBoard(
+							_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig, out movements)
+							);
+						loopSequence.Join(
+							_boardView.GetMoveIconsSequence(movements, RowOffset, _config.FillAnimationDuration)
+							);
+						await loopSequence
+							.Play()
+							.AsyncWaitForCompletion();
+					}
+
+					//check for possible solutions
+					if (NeedShuffle(_board))
+					{
+						DoShuffle(_board, _boardView, _shufflePopup);
 					}
 				}
 				else
@@ -163,6 +186,38 @@ namespace Client
 			}
 
 			return haveSolution;
+		}
+
+		//TODO: optimize
+		private bool NeedShuffle(Board board)
+		{
+			foreach (var cell in board.Cells)
+			{
+				foreach (var solutionRule in _config.SolutionRules)
+				{
+					if (solutionRule.HasPotentialSolutions(board.Cells,cell.Coords))
+					{
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		private async Task<Board> DoShuffle(Board board, BoardView boardView, ShufflePopup shufflePopup)
+		{
+			_inputBlocked = true;
+			await shufflePopup.ShowPopup();
+			var existingBoard = board.GetExistingBoard();
+			do
+			{
+				_board = _config.BoardFillRule.FillBoard(_config, existingBoard);
+				FillBoardView();
+			} while (NeedShuffle(board));
+
+			_inputBlocked = false;
+			return board;
 		}
 	}
 }

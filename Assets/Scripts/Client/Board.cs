@@ -1,6 +1,9 @@
 namespace Client
 {
+	using System.Collections.Generic;
+	using System.Linq;
 	using Configs;
+	using Rules;
 	using UnityEngine;
 
 	public sealed class Board
@@ -52,6 +55,24 @@ namespace Client
 			cell2.UpdateIconFromConfig();
 			cell1.UpdatePopIconFromConfig();
 			cell2.UpdatePopIconFromConfig();
+		}
+
+		public ExistingBoard GetExistingBoard()
+		{
+			var result = new ExistingBoard();
+			var currentCells = _config.CellConfigs.ToDictionary(cellConfig => cellConfig, _ => 0);
+			foreach (var cell in _cells)
+			{
+				if (cell.IsHole)
+				{
+					result.Holes.Add(cell.Coords);
+				}
+				currentCells[cell.Config]++;
+			}
+
+			result.cellConfigsPool = currentCells;
+
+			return result;
 		}
 	}
 }
