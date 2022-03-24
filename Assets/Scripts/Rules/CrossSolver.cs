@@ -1,91 +1,58 @@
 namespace Rules
 {
 	using System.Collections.Generic;
+	using System.Linq;
 	using Client;
 	using UnityEngine;
 
 	[CreateAssetMenu(menuName = "SWG/CrossSolverRule")]
-	public class CrossSolver : SolutionRuleBase
+	public sealed class CrossSolver : SolutionRuleBase
 	{
 		[SerializeField] private int minimalChainLength = 3;
 
-		// private List<Cell> _neighbors = new List<Cell>();
-		private List<Cell> _connected = new List<Cell>();
+		private List<Cell> _connectedHorizontal;
+		private List<Cell> _connectedVertical;
 
-		private List<Cell> _result = new List<Cell>();
+		private readonly List<Cell> _result = new List<Cell>();
 
-		// private List<Cell> GetNeighborsVertical(Cell[,] boardCells, Vector2Int cellCoords)
-		// {
-		// 	var sizeX = boardCells.GetLength(0);
-		// 	var sizeY = boardCells.GetLength(1);
-		//
-		// 	_neighbors.Clear();
-		// 	//TODO: move into properties?
-		// 	//top
-		// 	if (cellCoords.y > 0 && boardCells[cellCoords.x, cellCoords.y - 1] != null)
-		// 	{
-		// 		_neighbors.Add(boardCells[cellCoords.x, cellCoords.y - 1]);
-		// 	}
-		//
-		// 	//bottom
-		// 	if (cellCoords.y < sizeY - 1 && boardCells[cellCoords.x, cellCoords.y + 1] != null)
-		// 	{
-		// 		_neighbors.Add(boardCells[cellCoords.x, cellCoords.y + 1]);
-		// 	}
-		//
-		// 	return _neighbors;
-		// }
-		//
-		// private List<Cell> GetNeighborsHorizontal(Cell[,] board, Vector2Int cellCoords)
-		// {
-		// 	var sizeX = board.GetLength(0);
-		// 	var sizeY = board.GetLength(1);
-		//
-		// 	_neighbors.Clear();
-		// 	//TODO: move into properties?
-		// 	//right
-		// 	if (cellCoords.x < sizeX && board[cellCoords.x + 1, cellCoords.y] != null)
-		// 	{
-		// 		_neighbors.Add(board[cellCoords.x + 1, cellCoords.y]);
-		// 	}
-		// 	//left
-		// 	if (cellCoords.x > 0 && board[cellCoords.x - 1, cellCoords.y] != null)
-		// 	{
-		// 		_neighbors.Add(board[cellCoords.x - 1, cellCoords.y]);
-		// 	}
-		//
-		// 	return _neighbors;
-		// }
-		
-		public override List<Cell> GetConnectedCells(Board board, Vector2Int cellCoords)
+		public override bool TryGetConnectedCells(Cell[,] board, Vector2Int cellCoords, out List<Cell> connectedCells)
 		{
-			_connected.Clear();
-			//immdiately return on empty cell
-			if (board.GetCell(cellCoords).IsEmpty)
+			//immediately return on empty cell
+			var cell = board[cellCoords.x, cellCoords.y];
+			if (cell == null || cell.IsEmpty)
 			{
-				return null;
+				connectedCells = null;
+				return false;
 			}
 
-			_connected = GetChainHorizontal(board, cellCoords);
-			if (_connected.Count >= minimalChainLength)
+			connectedCells = new List<Cell>();
+			var result = false;
+
+			_connectedHorizontal = GetChainHorizontal(board, cellCoords);
+			if (_connectedHorizontal.Count >= minimalChainLength)
 			{
-				return _connected;
+				//note: boxing
+				connectedCells = connectedCells.Union(_connectedHorizontal).ToList();
+				result = true;
 			}
 
-			_connected = GetChainVertical(board, cellCoords);
-			if (_connected.Count >= minimalChainLength)
+			_connectedVertical = GetChainVertical(board, cellCoords);
+			if (_connectedVertical.Count >= minimalChainLength)
 			{
-				return _connected;
+				//note: boxing
+				connectedCells = connectedCells.Union(_connectedVertical).ToList();
+				result = true;
 			}
 
-			return null;
+			return result;
 		}
 
-		private List<Cell> GetChainVertical(Board board, Vector2Int cellCoords)
+		private List<Cell> GetChainVertical(Cell[,] board, Vector2Int cellCoords)
 		{
 			_result.Clear();
-			var sampleCell = board.GetCell(cellCoords);
-			var sizeY = board.Size.y;
+			var sampleCell = board[cellCoords.x, cellCoords.y];
+			var sizeY = board.GetLength(1);
+			
 			_result.Add(sampleCell);
 			
 			//move up
@@ -93,7 +60,7 @@ namespace Rules
 			checkCoords.y--;
 			while (checkCoords.y >= 0)
 			{
-				var checkCell = board.GetCell(checkCoords);
+				var checkCell = board[checkCoords.x, checkCoords.y];
 				if (checkCell.IsEmpty || checkCell.Config != sampleCell.Config)
 				{
 					break;
@@ -108,7 +75,7 @@ namespace Rules
 			checkCoords.y++;
 			while (checkCoords.y < sizeY)
 			{
-				var checkCell = board.GetCell(checkCoords);
+				var checkCell = board[checkCoords.x, checkCoords.y];
 				if (checkCell == null || checkCell.Config != sampleCell.Config)
 				{
 					break;
@@ -117,16 +84,17 @@ namespace Rules
 				_result.Add(checkCell);
 				checkCoords.y++;
 			}
-			Debug.Log($"Found {_result.Count} vertical chain");
+			// Debug.Log($"{nameof(CrossSolver)}: Found {_result.Count} vertical chain");
 			return _result;
 		}
 
-		private List<Cell> GetChainHorizontal(Board board, Vector2Int cellCoords)
+		private List<Cell> GetChainHorizontal(Cell[,] board, Vector2Int cellCoords)
 		{
 			_result.Clear();
 
-			var sampleCell = board.GetCell(cellCoords);
-			var sizeX = board.Size.x;
+			var sampleCell = board[cellCoords.x, cellCoords.y];
+			var sizeX = board.GetLength(0);
+			
 			_result.Add(sampleCell);
 
 			var checkCoords = cellCoords;
@@ -135,7 +103,7 @@ namespace Rules
 			checkCoords.x--;
 			while (checkCoords.x >= 0)
 			{
-				var checkCell = board.GetCell(checkCoords);
+				var checkCell = board[checkCoords.x, checkCoords.y];
 				if (checkCell == null || checkCell.Config != sampleCell.Config)
 				{
 					break;
@@ -150,7 +118,7 @@ namespace Rules
 			checkCoords.x++;
 			while (checkCoords.x < sizeX)
 			{
-				var checkCell = board.GetCell(checkCoords);
+				var checkCell = board[checkCoords.x, checkCoords.y];
 				if (checkCell == null || checkCell.Config != sampleCell.Config)
 				{
 					break;
@@ -159,8 +127,10 @@ namespace Rules
 				_result.Add(checkCell);
 				checkCoords.x++;
 			}
-			Debug.Log($"Found {_result.Count} horizontal chain");
+			// Debug.Log($"{nameof(CrossSolver)}: Found {_result.Count} horizontal chain");
 			return _result;
 		}
+
+		
 	}
 }

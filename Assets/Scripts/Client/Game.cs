@@ -1,5 +1,7 @@
 namespace Client
 {
+	using System.Collections.Generic;
+	using System.Linq;
 	using Configs;
 	using UnityEngine;
 	using Views;
@@ -22,8 +24,7 @@ namespace Client
 
 		public void StartGame()
 		{
-			_board = new Board(_config.BoardConfig);
-			_board.FillBoard(_config.BoardFillRule);
+			_board = _config.BoardFillRule.FillBoard(_config);
 			FillBoardView();
 		}
 		
@@ -38,14 +39,25 @@ namespace Client
 			{
 				return;
 			}
-			Debug.Log($"Clicked in coords {cellPosition}");
 
+			Debug.Log($"{nameof(Game)}: Clicked in coords {cellPosition}");
+
+			// //try to solve there
+			// if (_config.SolutionRules.TryGetConnectedCells(_board, cellPosition, out var solution))
+			// {
+			// 	_inputBlocked = true;
+			// 	await _boardView.PopIcons(solution, _config.PopAnimationDuration);
+			// 	_inputBlocked = false;
+			// 	Debug.Log("{nameof(Game)}: Pop Sequence completed");
+			// }
+			// return;
+			
 			//new selection
-			if(_selection == null)
+			if (_selection == null)
 			{
 				_selection = _board.GetCell(cellPosition);
 				_boardView.ShowHighlight(cellPosition, true);
-				
+
 				return;
 			}
 
@@ -56,18 +68,50 @@ namespace Client
 			}
 
 			//already had selected something - test for distance. Should be exactly one for neighbors
-			Debug.Log($"Distance to previous selection = {Vector2Int.Distance(_selection.Coords, cellPosition)}");
+			// Debug.Log($"Distance to previous selection = {Vector2Int.Distance(_selection.Coords, cellPosition)}");
 			if (Mathf.Approximately(Vector2Int.Distance(_selection.Coords, cellPosition), 1))
 			{
 				_inputBlocked = true;
+				
 				_boardView.ShowHighlight(_selection.Coords, false);
 				_board.SwapCells(_selection.Coords, cellPosition);
 				//animate movement
 				await _boardView.SwapIcons(_selection.Coords, cellPosition, _config.SwapAnimationDuration);
+				
+				//test for solution in both positions
+				//TODO: extract list
+				var haveSolution = false;
+				var fullSolution = new List<Cell>();
 
+				foreach (var solutionRule in _config.SolutionRules)
+				{
+					if (solutionRule.TryGetConnectedCells(_board.Cells, _selection.Coords, out var solution1))
+					{
+						fullSolution = fullSolution.Union(solution1).ToList();
+						haveSolution = true;
+					}
+
+					if (solutionRule.TryGetConnectedCells(_board.Cells, cellPosition, out var solution2))
+					{
+						fullSolution = fullSolution.Union(solution2).ToList();
+						haveSolution = true;
+					}
+				}
+				
+				if (haveSolution)
+				{
+					//pop animation
+					await _boardView.PopIcons(fullSolution, _config.PopAnimationDuration);
+				}
+				else
+				{
+					//swap back
+					_board.SwapCells(_selection.Coords, cellPosition);
+					await _boardView.SwapIcons(_selection.Coords, cellPosition, _config.SwapAnimationDuration);
+				}
+				
 				_selection = null;
 				_inputBlocked = false;
-				Debug.Log("Swap completed");
 				return;
 			}
 
@@ -75,28 +119,6 @@ namespace Client
 			_boardView.ShowHighlight(_selection.Coords, false);
 			_selection = _board.GetCell(cellPosition);
 			_boardView.ShowHighlight(_selection.Coords, true);
-			return;
-
-
-			//try to solve there
-			// var solution = _config.SolutionRule.GetConnectedCells(_board, cellPosition);
-			// if (solution != null)
-			// {
-			// 	_inputBlocked = true;
-			//
-			// 	var sequence = DOTween.Sequence();
-			// 	var sequence2 = DOTween.Sequence();
-			// 	foreach (var cell in solution)
-			// 	{
-			// 		sequence.Join(cell.View.Icon.transform.DOScale(2, _config.AnimationDuration));
-			// 		sequence2.Join(cell.View.Icon.transform.DOScale(1, _config.AnimationDuration));
-			// 	}
-			//
-			// 	sequence.Append(sequence2);
-			// 	await sequence.Play().AsyncWaitForCompletion();
-			// 	_inputBlocked = false;
-			// 	Debug.Log("Sequence completed");
-			// }
 		}
 	}
 }

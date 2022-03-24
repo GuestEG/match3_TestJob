@@ -6,14 +6,16 @@ namespace Rules
 	using Random = UnityEngine.Random;
 
 	[CreateAssetMenu(menuName = "SWG/SimpleBoardFillRule")]
+	
+	// Just a random cell fill, no checks
 	public sealed class SimpleBoardFillRule : BoardFillRuleBase
 	{
-		//just random cell fill
-		public override Cell[,] FillBoard(BoardConfig config)
+		public override Board FillBoard(GameConfig gameConfig)
 		{
+			var config = gameConfig.BoardConfig;
 			var sizeX = config.BoardSize.x;
 			var sizeY = config.BoardSize.y;
-			Cell[,] result = new Cell[sizeX, sizeY];
+			Cell[,] cells = new Cell[sizeX, sizeY];
 			
 			//fill in empty
 			var emptyCells = config.EmptyCellsNum;
@@ -21,11 +23,11 @@ namespace Rules
 			{
 				var rndX = Random.Range(0, sizeX);
 				var rndY = Random.Range(0, sizeY);
-				if (result[rndX, rndY] == null)
+				if (cells[rndX, rndY] == null)
 				{
 					var cell = new Cell();
 					cell.Coords = new Vector2Int(rndX, rndY);
-					result[rndX, rndY] = cell;
+					cells[rndX, rndY] = cell;
 					emptyCells--;
 				}
 			}
@@ -35,7 +37,7 @@ namespace Rules
 				for (int x = 0; x < sizeX; x++)
 				{
 					//skip prefilled empties
-					if (result[x, y] != null)
+					if (cells[x, y] != null)
 					{
 						continue;
 					}
@@ -45,9 +47,12 @@ namespace Rules
 					cell.Config = randomCellConfig;
 					cell.Coords = new Vector2Int(x, y);
 
-					result[x, y] = cell;
+					cells[x, y] = cell;
 				}
 			}
+
+			Board result = new Board(config);
+			result.FillBoard(cells);
 
 			return result;
 		}

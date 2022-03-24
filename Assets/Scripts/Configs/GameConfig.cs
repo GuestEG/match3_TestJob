@@ -1,5 +1,6 @@
 namespace Configs
 {
+    using System.Collections.Generic;
     using Rules;
     using UnityEngine;
     
@@ -7,12 +8,13 @@ namespace Configs
     public sealed class GameConfig : ScriptableObject
     {
         public float SwapAnimationDuration = 0.5f;
+        public float PopAnimationDuration = 0.5f;
 
         [Header("Configs")]
         public BoardConfig BoardConfig;
 
         [Header("Rules")]
         public BoardFillRuleBase BoardFillRule;
-        public SolutionRuleBase SolutionRule;
+        public List<SolutionRuleBase> SolutionRules;
     }
 }
