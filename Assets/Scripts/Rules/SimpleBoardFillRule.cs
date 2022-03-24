@@ -1,5 +1,6 @@
 namespace Rules
 {
+	using System;
 	using Client;
 	using Configs;
 	using UnityEngine;
@@ -8,9 +9,10 @@ namespace Rules
 	[CreateAssetMenu(menuName = "Match3Test/SimpleBoardFillRule")]
 	
 	// Just a random cell fill, no checks
+	[Obsolete]
 	public sealed class SimpleBoardFillRule : BoardFillRuleBase
 	{
-		public override Board FillBoard(GameConfig gameConfig)
+		public override Board FillBoard(GameConfig gameConfig, ExistingBoard existingBoard = null)
 		{
 			var config = gameConfig.BoardConfig;
 			var sizeX = config.BoardSize.x;

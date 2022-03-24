@@ -6,11 +6,10 @@ namespace Rules
 	using Random = UnityEngine.Random;
 
 	[CreateAssetMenu(menuName = "Match3Test/NoPopsFillRule")]
-	
 	//This rule generates random board with no immediate solution
 	public sealed class NoPopsFillRule : BoardFillRuleBase
 	{
-		public override Board FillBoard(GameConfig gameConfig)
+		public override Board FillBoard(GameConfig gameConfig, ExistingBoard existingBoard = null)
 		{
 			var boardConfig = gameConfig.BoardConfig;
 			var solutionRules = gameConfig.SolutionRules;
@@ -22,18 +21,31 @@ namespace Rules
 			var board = new Board(boardConfig);
 			
 			//fill in empty - do not iterate variants here
-			var emptyCells = boardConfig.EmptyCellsNum;
-			while (emptyCells > 0)
-			{
-				var rndX = Random.Range(0, sizeX);
-				var rndY = Random.Range(0, sizeY);
 
-				if (cells[rndX, rndY] == null)
+			if(existingBoard == null)
+			{
+				var emptyCells = boardConfig.EmptyCellsNum;
+				while (emptyCells > 0)
+				{
+					var rndX = Random.Range(0, sizeX);
+					var rndY = Random.Range(0, sizeY);
+
+					if (cells[rndX, rndY] == null)
+					{
+						var cell = new Cell();
+						cell.Coords = new Vector2Int(rndX, rndY);
+						cells[rndX, rndY] = cell;
+						emptyCells--;
+					}
+				}
+			}
+			else
+			{
+				foreach (var hole in existingBoard.Holes)
 				{
 					var cell = new Cell();
-					cell.Coords = new Vector2Int(rndX, rndY);
-					cells[rndX, rndY] = cell;
-					emptyCells--;
+					cell.Coords = hole;
+					cells[hole.x, hole.y] = cell;
 				}
 			}
 			
@@ -56,7 +68,19 @@ namespace Rules
 					do
 					{
 						// Debug.Log($"{nameof(NoPopsFillRule)}: Gen cycle = {cycles}");
-						randomCellConfig = boardConfig.CellConfigs[Random.Range(0, boardConfig.CellConfigs.Count)];
+
+						if(existingBoard != null)
+						{
+							do
+							{
+								randomCellConfig = boardConfig.CellConfigs[Random.Range(0, boardConfig.CellConfigs.Count)];
+							} while (existingBoard.cellConfigsPool[randomCellConfig] <= 0);
+						}
+						else
+						{
+							randomCellConfig = boardConfig.CellConfigs[Random.Range(0, boardConfig.CellConfigs.Count)];
+						}
+						
 						cycles++;
 						if (cycles > 10000)
 						{
@@ -75,6 +99,11 @@ namespace Rules
 						}
 					}
 					while (haveSolution);
+
+					if (existingBoard != null)
+					{
+						existingBoard.cellConfigsPool[randomCellConfig] -= 1;
+					}
 				}
 			}
 			

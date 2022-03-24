@@ -47,6 +47,11 @@ namespace Rules
 			return result;
 		}
 
+		public override bool HasPotentialSolutions(Cell[,] board, Vector2Int cellCoords)
+		{
+			throw new System.NotImplementedException();
+		}
+
 		private List<Cell> GetChainVertical(Cell[,] board, Vector2Int cellCoords)
 		{
 			_result.Clear();
