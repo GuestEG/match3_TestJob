@@ -1,84 +1,46 @@
 namespace Rules
 {
 	using System.Collections.Generic;
+	using System.Linq;
 	using Client;
 	using UnityEngine;
 
 	[CreateAssetMenu(menuName = "SWG/CrossSolverRule")]
-	public class CrossSolver : SolutionRuleBase
+	public sealed class CrossSolver : SolutionRuleBase
 	{
 		[SerializeField] private int minimalChainLength = 3;
 
-		// private List<Cell> _neighbors = new List<Cell>();
-		private List<Cell> _connected = new List<Cell>();
+		private List<Cell> _connectedHorizontal;
+		private List<Cell> _connectedVertical;
 
-		private List<Cell> _result = new List<Cell>();
+		private readonly List<Cell> _result = new List<Cell>();
 
-		// private List<Cell> GetNeighborsVertical(Cell[,] boardCells, Vector2Int cellCoords)
-		// {
-		// 	var sizeX = boardCells.GetLength(0);
-		// 	var sizeY = boardCells.GetLength(1);
-		//
-		// 	_neighbors.Clear();
-		// 	//TODO: move into properties?
-		// 	//top
-		// 	if (cellCoords.y > 0 && boardCells[cellCoords.x, cellCoords.y - 1] != null)
-		// 	{
-		// 		_neighbors.Add(boardCells[cellCoords.x, cellCoords.y - 1]);
-		// 	}
-		//
-		// 	//bottom
-		// 	if (cellCoords.y < sizeY - 1 && boardCells[cellCoords.x, cellCoords.y + 1] != null)
-		// 	{
-		// 		_neighbors.Add(boardCells[cellCoords.x, cellCoords.y + 1]);
-		// 	}
-		//
-		// 	return _neighbors;
-		// }
-		//
-		// private List<Cell> GetNeighborsHorizontal(Cell[,] board, Vector2Int cellCoords)
-		// {
-		// 	var sizeX = board.GetLength(0);
-		// 	var sizeY = board.GetLength(1);
-		//
-		// 	_neighbors.Clear();
-		// 	//TODO: move into properties?
-		// 	//right
-		// 	if (cellCoords.x < sizeX && board[cellCoords.x + 1, cellCoords.y] != null)
-		// 	{
-		// 		_neighbors.Add(board[cellCoords.x + 1, cellCoords.y]);
-		// 	}
-		// 	//left
-		// 	if (cellCoords.x > 0 && board[cellCoords.x - 1, cellCoords.y] != null)
-		// 	{
-		// 		_neighbors.Add(board[cellCoords.x - 1, cellCoords.y]);
-		// 	}
-		//
-		// 	return _neighbors;
-		// }
-		
-		public override List<Cell> GetConnectedCells(Board board, Vector2Int cellCoords)
+		public override bool TryGetConnectedCells(Board board, Vector2Int cellCoords, out List<Cell> connectedCells)
 		{
-			_connected.Clear();
 			//immdiately return on empty cell
 			if (board.GetCell(cellCoords).IsEmpty)
 			{
-				return null;
+				connectedCells = null;
+				return false;
 			}
 
-			_connected = GetChainHorizontal(board, cellCoords);
-			if (_connected.Count >= minimalChainLength)
+			_connectedHorizontal = GetChainHorizontal(board, cellCoords);
+			if (_connectedHorizontal.Count < minimalChainLength)
 			{
-				return _connected;
+				connectedCells = null;
+				return false;
 			}
 
-			_connected = GetChainVertical(board, cellCoords);
-			if (_connected.Count >= minimalChainLength)
+			_connectedVertical = GetChainVertical(board, cellCoords);
+			if (_connectedVertical.Count < minimalChainLength)
 			{
-				return _connected;
+				connectedCells = _connectedHorizontal;
+				return true;
 			}
 
-			return null;
+			//TODO: get rid of boxing
+			connectedCells = _connectedHorizontal.Union(_connectedVertical).ToList();
+			return true;
 		}
 
 		private List<Cell> GetChainVertical(Board board, Vector2Int cellCoords)
@@ -162,5 +124,7 @@ namespace Rules
 			Debug.Log($"Found {_result.Count} horizontal chain");
 			return _result;
 		}
+
+		
 	}
 }

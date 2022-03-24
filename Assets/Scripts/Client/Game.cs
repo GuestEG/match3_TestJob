@@ -79,7 +79,7 @@ namespace Client
 
 
 			//try to solve there
-			// var solution = _config.SolutionRule.GetConnectedCells(_board, cellPosition);
+			// var solution = _config.SolutionRule.TryGetConnectedCells(_board, cellPosition);
 			// if (solution != null)
 			// {
 			// 	_inputBlocked = true;
