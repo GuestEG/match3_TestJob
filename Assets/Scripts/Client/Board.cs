@@ -34,9 +34,7 @@ namespace Client
 		}
 
 		public Cell GetCell(Vector2Int cellPosition) => _cells[cellPosition.x, cellPosition.y];
-		// public Cell GetCell(int x, int y) => _cells[x, y];
-		public void SetCell(Cell newCell, Vector2Int cellPosition) => _cells[cellPosition.x, cellPosition.y] = newCell;
-
+		
 		public void SwapCells(Vector2Int cellPosition1, Vector2Int cellPosition2)
 		{
 			var cell1 = GetCell(cellPosition1);
@@ -73,6 +71,16 @@ namespace Client
 			result.cellConfigsPool = currentCells;
 
 			return result;
+		}
+
+		//TODO: refactor, should not be there
+		public void UpdateAllCells()
+		{
+			foreach (var cell in _cells)
+			{
+				cell.UpdateIconFromConfig();
+				cell.UpdatePopIconFromConfig();
+			}
 		}
 	}
 }

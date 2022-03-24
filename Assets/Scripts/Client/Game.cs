@@ -122,7 +122,8 @@ namespace Client
 					//check for possible solutions
 					if (NeedShuffle(_board))
 					{
-						DoShuffle(_board, _boardView, _shufflePopup);
+						_board = await DoShuffle(_board, _boardView, _shufflePopup);
+						_board.UpdateAllCells();
 					}
 				}
 				else
@@ -212,10 +213,10 @@ namespace Client
 			var existingBoard = board.GetExistingBoard();
 			do
 			{
-				_board = _config.BoardFillRule.FillBoard(_config, existingBoard);
-				FillBoardView();
+				board = _config.BoardFillRule.FillBoard(_config, existingBoard);
 			} while (NeedShuffle(board));
 
+			await shufflePopup.HidePopup();
 			_inputBlocked = false;
 			return board;
 		}
