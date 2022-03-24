@@ -15,6 +15,7 @@ namespace Configs
 
         [Header("Rules")]
         public BoardFillRuleBase BoardFillRule;
+        public BoardMovementRule BoardMovementRule;
         public List<SolutionRuleBase> SolutionRules;
     }
 }

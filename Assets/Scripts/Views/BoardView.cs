@@ -13,7 +13,7 @@ namespace Views
         private BoardConfig _config;
 
         private CellView[,] _cellViews;
-
+        
         public void SetConfig(BoardConfig config)
         {
             _config = config;
@@ -28,9 +28,9 @@ namespace Views
                 var row = Instantiate(_config.RowPrefab, this.transform);
                 for (int x = 0; x < board.Size.x; x++)
                 {
-                    var cell = board.GetCell(x, y);
+                    var cell = board.Cells[x, y];
 
-                    if (cell.IsEmpty)
+                    if (cell.IsHole)
                     {
                         _cellViews[x, y] = null;
                         Instantiate(_config.EmptyCellPrefab, row.transform, false);
@@ -74,17 +74,25 @@ namespace Views
         public async Task PopIcons(List<Cell> cells, float duration)
         {
             var sequence = DOTween.Sequence();
-            var sequence2 = DOTween.Sequence();
+            // var sequence2 = DOTween.Sequence();
             foreach (var cell in cells)
             {
+                var iconSequence = DOTween.Sequence();
                 var cellView = _cellViews[cell.Coords.x, cell.Coords.y];
-                var icon = cellView.Icon;
-                sequence.Join(icon.transform.DOScale(2, duration / 2));
-                sequence2.Join(icon.transform.DOScale(1, duration / 2));
+                var popIcon = cellView.PopIcon;
+                popIcon.gameObject.SetActive(true);
+                iconSequence.Join(popIcon.transform.DOScale(2, duration));
+                iconSequence.Join(popIcon.DOFade(0, duration));
+                iconSequence.AppendCallback(() =>
+                {
+                    popIcon.gameObject.SetActive(false);
+                    popIcon.transform.localScale = Vector3.one;
+                    popIcon.color += Color.black; //resets Alpha back to 1
+
+                });
+                sequence.Join(iconSequence);
             }
-
-            sequence.Append(sequence2);
-
+            
             await sequence.Play().AsyncWaitForCompletion();
         }
     }

@@ -8,13 +8,14 @@ namespace Composition
     public sealed class GameRoot : MonoBehaviour
     {
         [SerializeField] private BoardView _board;
+        [SerializeField] private RowView _offscreenRowView;
         [SerializeField] private GameConfig _config;
         
         private Game _game;
 
         private void Awake()
         {
-            _game = new Game(_board, _config);
+            _game = new Game(_board, _offscreenRowView, _config);
         }
 
         private void Start()

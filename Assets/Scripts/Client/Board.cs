@@ -1,7 +1,6 @@
 namespace Client
 {
 	using Configs;
-	using Rules;
 	using UnityEngine;
 
 	public sealed class Board
@@ -32,10 +31,10 @@ namespace Client
 		}
 
 		public Cell GetCell(Vector2Int cellPosition) => _cells[cellPosition.x, cellPosition.y];
-		public Cell GetCell(int x, int y) => _cells[x, y];
+		// public Cell GetCell(int x, int y) => _cells[x, y];
 		public void SetCell(Cell newCell, Vector2Int cellPosition) => _cells[cellPosition.x, cellPosition.y] = newCell;
 
-		public async void SwapCells(Vector2Int cellPosition1, Vector2Int cellPosition2)
+		public void SwapCells(Vector2Int cellPosition1, Vector2Int cellPosition2)
 		{
 			var cell1 = GetCell(cellPosition1);
 			var cell2 = GetCell(cellPosition2);

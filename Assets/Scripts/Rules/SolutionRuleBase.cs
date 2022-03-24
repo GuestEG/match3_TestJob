@@ -17,7 +17,7 @@ namespace Rules
 
             cellCoords.y -= 1;
             var neighbor = board[cellCoords.x, cellCoords.y];
-            if (neighbor == null || neighbor.IsEmpty)
+            if (neighbor == null || neighbor.IsHole)
             {
                 return null;
             }
@@ -36,7 +36,7 @@ namespace Rules
 
             cellCoords.y += 1;
             var neighbor = board[cellCoords.x, cellCoords.y];
-            if (neighbor == null || neighbor.IsEmpty)
+            if (neighbor == null || neighbor.IsHole)
             {
                 return null;
             }
@@ -53,7 +53,7 @@ namespace Rules
 
             cellCoords.x -= 1;
             var neighbor = board[cellCoords.x, cellCoords.y];
-            if (neighbor == null || neighbor.IsEmpty)
+            if (neighbor == null || neighbor.IsHole)
             {
                 return null;
             }
@@ -71,7 +71,7 @@ namespace Rules
 
             cellCoords.x += 1;
             var neighbor = board[cellCoords.x, cellCoords.y];
-            if (neighbor == null || neighbor.IsEmpty)
+            if (neighbor == null || neighbor.IsHole)
             {
                 return null;
             }
