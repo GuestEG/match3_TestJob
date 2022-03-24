@@ -9,12 +9,15 @@ namespace Views
         [SerializeField] private Button _button;
         [SerializeField] private Image _highlight;
         [SerializeField] private Image _icon;
+        [SerializeField] private Image _popIcon;
 
         public Image Icon => _icon;
+        public Image PopIcon => _popIcon;
 
         private void Start()
         {
-            ShowHighlight(false);
+            _highlight.gameObject.SetActive(false);
+            _popIcon.gameObject.SetActive(false);
         }
 
         public void ShowHighlight(bool show)

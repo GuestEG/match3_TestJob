@@ -8,7 +8,7 @@ namespace Client
 	{
 		public CellView View { private get; set; }
 		public CellConfig Config { get; set; }
-		public bool IsEmpty => Config == null;
+		public bool IsHole => Config == null;
 		public Vector2Int Coords { get; set; }
 
 		public void UpdateIconFromConfig()
@@ -19,6 +19,16 @@ namespace Client
 			}
 
 			View.Icon.sprite = Config.Icon;
+		}
+
+		public void UpdatePopIconFromConfig()
+		{
+			if (View == null)
+			{
+				return;
+			}
+
+			View.PopIcon.sprite = Config.Icon;
 		}
 	}
 }

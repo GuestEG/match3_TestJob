@@ -19,7 +19,7 @@ namespace Rules
 		{
 			//immediately return on empty cell
 			var cell = board[cellCoords.x, cellCoords.y];
-			if (cell == null || cell.IsEmpty)
+			if (cell == null || cell.IsHole)
 			{
 				connectedCells = null;
 				return false;
@@ -61,7 +61,7 @@ namespace Rules
 			while (checkCoords.y >= 0)
 			{
 				var checkCell = board[checkCoords.x, checkCoords.y];
-				if (checkCell.IsEmpty || checkCell.Config != sampleCell.Config)
+				if (checkCell.IsHole || checkCell.Config != sampleCell.Config)
 				{
 					break;
 				}
