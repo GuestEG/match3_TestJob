@@ -6,9 +6,9 @@ namespace Rules
 
     public abstract class SolutionRuleBase : ScriptableObject
     {
-        public abstract bool TryGetConnectedCells(Board board, Vector2Int cellCoords, out List<Cell> connectedCells);
+        public abstract bool TryGetConnectedCells(Cell[,] board, Vector2Int cellCoords, out List<Cell> connectedCells);
 
-        protected static Cell Top(Board board, Vector2Int cellCoords)
+        protected static Cell Top(Cell[,] board, Vector2Int cellCoords)
         {
             if (cellCoords.y <= 0)
             {
@@ -16,7 +16,7 @@ namespace Rules
             }
 
             cellCoords.y -= 1;
-            var neighbor = board.GetCell(cellCoords);
+            var neighbor = board[cellCoords.x, cellCoords.y];
             if (neighbor == null || neighbor.IsEmpty)
             {
                 return null;
@@ -25,15 +25,17 @@ namespace Rules
             return neighbor;
         }
 
-        protected static Cell Bottom(Board board, Vector2Int cellCoords)
+        protected static Cell Bottom(Cell[,] board, Vector2Int cellCoords)
         {
-            if (cellCoords.y >= board.Size.y - 1)
+            var maxY = board.GetLength(1) - 1;
+
+            if (cellCoords.y >= maxY)
             {
                 return null;
             }
 
             cellCoords.y += 1;
-            var neighbor = board.GetCell(cellCoords);
+            var neighbor = board[cellCoords.x, cellCoords.y];
             if (neighbor == null || neighbor.IsEmpty)
             {
                 return null;
@@ -42,7 +44,7 @@ namespace Rules
             return neighbor;
         }
 
-        protected static Cell Left(Board board, Vector2Int cellCoords)
+        protected static Cell Left(Cell[,] board, Vector2Int cellCoords)
         {
             if (cellCoords.x <= 0)
             {
@@ -50,7 +52,7 @@ namespace Rules
             }
 
             cellCoords.x -= 1;
-            var neighbor = board.GetCell(cellCoords);
+            var neighbor = board[cellCoords.x, cellCoords.y];
             if (neighbor == null || neighbor.IsEmpty)
             {
                 return null;
@@ -59,15 +61,16 @@ namespace Rules
             return neighbor;
         }
 
-        protected static Cell Right(Board board, Vector2Int cellCoords)
+        protected static Cell Right(Cell[,] board, Vector2Int cellCoords)
         {
-            if (cellCoords.x >= board.Size.x - 1)
+            var maxX = board.GetLength(0) - 1;
+            if (cellCoords.x >= maxX)
             {
                 return null;
             }
 
             cellCoords.x += 1;
-            var neighbor = board.GetCell(cellCoords);
+            var neighbor = board[cellCoords.x, cellCoords.y];
             if (neighbor == null || neighbor.IsEmpty)
             {
                 return null;

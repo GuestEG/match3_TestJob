@@ -6,7 +6,7 @@ namespace Rules
 	[CreateAssetMenu(menuName = "SWG/RecursiveSolverHorizontal")]
 	public sealed class RecursiveSolverHorizontal : RecursiveLineSolver
 	{
-		private protected override Cell[] Neighbours(Board board, Vector2Int cellCoords)
+		private protected override Cell[] Neighbours(Cell[,] board, Vector2Int cellCoords)
 		{
 			var result = new Cell[2];
 			result[0] = Left(board, cellCoords);

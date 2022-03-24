@@ -18,9 +18,9 @@ namespace Client
 			_cells = new Cell[_config.BoardSize.x, _config.BoardSize.y];
 		}
 
-		public void FillBoard(BoardFillRuleBase rule)
+		public void FillBoard(Cell[,] cells)
 		{
-			_cells = rule.FillBoard(_config);
+			_cells = cells;
 		}
 
 		public Cell GetCell(Vector2Int cellPosition) => _cells[cellPosition.x, cellPosition.y];

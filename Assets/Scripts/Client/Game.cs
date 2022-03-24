@@ -24,8 +24,7 @@ namespace Client
 
 		public void StartGame()
 		{
-			_board = new Board(_config.BoardConfig);
-			_board.FillBoard(_config.BoardFillRule);
+			_board = _config.BoardFillRule.FillBoard(_config);
 			FillBoardView();
 		}
 		
@@ -41,7 +40,7 @@ namespace Client
 				return;
 			}
 
-			Debug.Log($"Clicked in coords {cellPosition}");
+			Debug.Log($"{nameof(Game)}: Clicked in coords {cellPosition}");
 
 			// //try to solve there
 			// if (_config.SolutionRules.TryGetConnectedCells(_board, cellPosition, out var solution))
@@ -49,7 +48,7 @@ namespace Client
 			// 	_inputBlocked = true;
 			// 	await _boardView.PopIcons(solution, _config.PopAnimationDuration);
 			// 	_inputBlocked = false;
-			// 	Debug.Log("Pop Sequence completed");
+			// 	Debug.Log("{nameof(Game)}: Pop Sequence completed");
 			// }
 			// return;
 			

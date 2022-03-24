@@ -6,6 +6,6 @@ namespace Rules
 
 	public abstract class BoardFillRuleBase : ScriptableObject
 	{
-		public abstract Cell[,] FillBoard(BoardConfig config);
+		public abstract Board FillBoard(GameConfig config);
 	}
 }

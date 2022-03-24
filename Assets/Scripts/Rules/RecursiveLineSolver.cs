@@ -8,7 +8,7 @@ namespace Rules
 	{
 		[SerializeField] private int _minimalChainLength = 3;
 
-		public override bool TryGetConnectedCells(Board board, Vector2Int cellCoords, out List<Cell> connectedCells)
+		public override bool TryGetConnectedCells(Cell[,] board, Vector2Int cellCoords, out List<Cell> connectedCells)
 		{
 			connectedCells = GetConnectedCells(board, cellCoords);
 			if (connectedCells.Count < _minimalChainLength)
@@ -19,9 +19,9 @@ namespace Rules
 			return true;
 		}
 
-		private List<Cell> GetConnectedCells(Board board, Vector2Int cellCoords, List<Cell> excludeList = null)
+		private List<Cell> GetConnectedCells(Cell[,] board, Vector2Int cellCoords, List<Cell> excludeList = null)
 		{
-			var sampleCell = board.GetCell(cellCoords);
+			var sampleCell = board[cellCoords.x, cellCoords.y];
 
 			var result = new List<Cell> { sampleCell };
 
@@ -48,6 +48,6 @@ namespace Rules
 			return result;
 		}
 
-		private protected abstract Cell[] Neighbours(Board board, Vector2Int cellCoords);
+		private protected abstract Cell[] Neighbours(Cell[,] board, Vector2Int cellCoords);
 	}
 }
