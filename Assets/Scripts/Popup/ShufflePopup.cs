@@ -22,6 +22,11 @@ namespace Popup
             var sequence = DOTween.Sequence();
             sequence.Append(_canvasGroup.DOFade(1, _popupFadeDuration));
             sequence.AppendInterval(_popupDuration);
+        }
+
+        public async Task HidePopup()
+        {
+            var sequence = DOTween.Sequence();
             sequence.Append(_canvasGroup.DOFade(0, _popupFadeDuration));
         }
     }
