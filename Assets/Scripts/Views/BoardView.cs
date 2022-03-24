@@ -6,6 +6,7 @@ namespace Views
     using Client;
     using Configs;
     using DG.Tweening;
+    using Rules;
     using UnityEngine;
 
     public class BoardView : MonoBehaviour
@@ -13,7 +14,9 @@ namespace Views
         private BoardConfig _config;
 
         private CellView[,] _cellViews;
-        
+
+        private RowView[] _rows;
+
         public void SetConfig(BoardConfig config)
         {
             _config = config;
@@ -22,6 +25,7 @@ namespace Views
         public void FillBoard(Board board, Action<Vector2Int> cellButtonClickHandler)
         {
             _cellViews = new CellView[board.Size.x, board.Size.y];
+            _rows = new RowView[board.Size.y];
 
             for (int y = 0; y < board.Size.y; y++)
             {
@@ -44,7 +48,9 @@ namespace Views
                     
                     cell.View = cellView;
                     cell.UpdateIconFromConfig();
+                    cell.UpdatePopIconFromConfig();
                 }
+                _rows[y] = row;
             }
         }
 
@@ -71,7 +77,7 @@ namespace Views
             cell.ShowHighlight(show);
         }
 
-        public async Task PopIcons(List<Cell> cells, float duration)
+        public Sequence GetPopIconsSequence(List<Cell> cells, float duration)
         {
             var sequence = DOTween.Sequence();
             // var sequence2 = DOTween.Sequence();
@@ -88,12 +94,48 @@ namespace Views
                     popIcon.gameObject.SetActive(false);
                     popIcon.transform.localScale = Vector3.one;
                     popIcon.color += Color.black; //resets Alpha back to 1
+                    cell.UpdatePopIconFromConfig();
 
                 });
                 sequence.Join(iconSequence);
             }
             
-            await sequence.Play().AsyncWaitForCompletion();
+            return sequence;
+        }
+
+        public Sequence GetMoveIconsSequence(List<CellMovement> movements, float rowOffset, float duration)
+        {
+            var sequence = DOTween.Sequence();
+            foreach (var movement in movements)
+            {
+                var targetCell = _cellViews[movement.End.x, movement.End.y];
+                var targetIcon = targetCell.Icon;
+
+                Vector3 startPosition;
+                if (movement.FromOffscreen)
+                {
+                    //take offscreen position
+                    startPosition = targetIcon.transform.position + Vector3.down * rowOffset * movement.Distance;
+                }
+                else
+                {
+                    var sourceCell = _cellViews[movement.Start.x, movement.Start.y];
+                    startPosition = sourceCell.Icon.transform.position;
+                }
+
+                //reverse move
+                sequence.Join(targetIcon.transform.DOMove(startPosition, duration * movement.Distance).From());
+            }
+
+            return sequence;
+        }
+
+        public float GetRowHeight()
+        {
+            //might be wrong, depends on prefabs and the moment in time
+            var row0 = _rows[0].transform;
+            var row1 = _rows[1].transform;
+            return Mathf.Abs(row0.position.y - row1.position.y);
         }
     }
 }

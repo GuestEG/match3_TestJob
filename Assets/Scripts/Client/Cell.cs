@@ -19,6 +19,15 @@ namespace Client
 			}
 
 			View.Icon.sprite = Config.Icon;
+		}
+
+		public void UpdatePopIconFromConfig()
+		{
+			if (View == null)
+			{
+				return;
+			}
+
 			View.PopIcon.sprite = Config.Icon;
 		}
 	}

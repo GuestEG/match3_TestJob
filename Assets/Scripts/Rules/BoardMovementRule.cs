@@ -7,21 +7,26 @@ namespace Rules
 
 	public sealed class CellMovement
 	{
-		public bool FromOffscreen;
+		public bool FromOffscreen = false;
 		public Vector2Int Start;
 		public Vector2Int End;
+		public int Distance;
 	}
+
 	[CreateAssetMenu(menuName = "SWG/BoardMovementRule")]
 	public sealed class BoardMovementRule : ScriptableObject
 	{
-		public Cell[,] FIllHoles(Cell[,] board, List<Cell> removedCells, BoardConfig config)
+		public Cell[,] FIllHoles(Cell[,] board, List<Cell> removedCells, BoardConfig config, out List<CellMovement> movements)
 		{
 			var columnsNum = board.GetLength(0);
 			var rowsNum = board.GetLength(1);
 
+			movements = new List<CellMovement>();
+
 			//work with one column from left to right
 			for (int column = 0; column < columnsNum; column++)
 			{
+				var columnBottom = 0;
 				//check every row from top
 				for (int row = 0; row < rowsNum; row++)
 				{
@@ -31,7 +36,7 @@ namespace Rules
 					{
 						var filled = false;
 						//now scan downwards until hit a filled or end of the board
-						for (int lookup = row+1; lookup < rowsNum; lookup++)
+						for (int lookup = row + 1; lookup < rowsNum; lookup++)
 						{
 							var nextCell = board[column, lookup];
 							if (!nextCell.IsHole && !removedCells.Contains(nextCell))
@@ -43,16 +48,37 @@ namespace Rules
 								removedCells.Add(nextCell);
 								boardCell.UpdateIconFromConfig();
 								filled = true;
+
+								//create movement for animation
+								var movement = new CellMovement()
+								{
+									End = boardCell.Coords,
+									Start = nextCell.Coords,
+									Distance = nextCell.Coords.y - boardCell.Coords.y
+								};
+								movements.Add(movement);
+
 								break;
 							}
 						}
-
+						
 						//if we hit bottom line - we'll make a new config instead
-						if(!filled)
+						if (!filled)
 						{
 							var randomCellConfig = config.CellConfigs[Random.Range(0, config.CellConfigs.Count)];
 							boardCell.Config = randomCellConfig;
 							boardCell.UpdateIconFromConfig();
+
+							columnBottom = Mathf.Max(columnBottom, rowsNum - boardCell.Coords.y);
+
+							//create movement for animation
+							var movement = new CellMovement()
+							{
+								End = boardCell.Coords,
+								Distance = columnBottom,
+								FromOffscreen = true
+							};
+							movements.Add(movement);
 						}
 					}
 				}
@@ -60,40 +86,5 @@ namespace Rules
 
 			return board;
 		}
-
-		/*
-		 fillHoles() -> [[Cookie]] {
-		    var columns: [[Cookie]] = []
-		    // 1
-		    for column in 0..<numColumns {
-		      var array: [Cookie] = []
-		      for row in 0..<numRows {
-		        // 2
-		        if tiles[column, row] != nil && cookies[column, row] == nil {
-		          // 3
-		          for lookup in (row + 1)..<numRows {
-		            if let cookie = cookies[column, lookup] {
-		              // 4
-		              cookies[column, lookup] = nil
-		              cookies[column, row] = cookie
-		              cookie.row = row
-		              // 5
-		              array.append(cookie)
-		              // 6
-		              break
-		            }
-		          }
-		        }
-		      }
-		      // 7
-		      if !array.isEmpty {
-		        columns.append(array)
-		      }
-		    }
-		    return columns
-		 */
-
-
-		
 	}
 }

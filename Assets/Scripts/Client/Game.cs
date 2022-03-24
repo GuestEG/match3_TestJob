@@ -3,6 +3,7 @@ namespace Client
 	using System.Collections.Generic;
 	using System.Linq;
 	using Configs;
+	using DG.Tweening;
 	using UnityEngine;
 	using Views;
 
@@ -10,19 +11,17 @@ namespace Client
 	{
 		private readonly GameConfig _config;
 		private readonly BoardView _boardView;
-		private readonly RowView _offscreenRowView;
-
+		
 		private bool _inputBlocked = false;
 		private Board _board;
 		private Cell _selection = null;
-		private Transform[] _offscreenCells;
+		private float RowOffset => _boardView.GetRowHeight();
 
-		public Game(BoardView boardView, RowView offscreenRowView, GameConfig config)
+		public Game(BoardView boardView, GameConfig config)
 		{
 			_config = config;
 			_boardView = boardView;
 			_boardView.SetConfig(config.BoardConfig);
-			_offscreenRowView = offscreenRowView;
 		}
 
 		public void StartGame()
@@ -34,13 +33,6 @@ namespace Client
 		private void FillBoardView()
 		{
 			_boardView.FillBoard(_board, CellButtonClickHandler);
-			_offscreenCells = new Transform[_board.Size.x];
-			for (int i = 0; i < _board.Size.x; i++)
-			{
-				var cell = new GameObject($"offscreenCell_{i}", typeof(RectTransform));
-				_offscreenCells[i] = cell.transform;
-				_offscreenRowView.AddCell(cell.transform);
-			}
 		}
 
 		private async void CellButtonClickHandler(Vector2Int cellPosition)
@@ -56,7 +48,7 @@ namespace Client
 			// if (_config.SolutionRules.TryGetConnectedCells(_board, cellPosition, out var solution))
 			// {
 			// 	_inputBlocked = true;
-			// 	await _boardView.PopIcons(solution, _config.PopAnimationDuration);
+			// 	await _boardView.GetPopIconsSequence(solution, _config.PopAnimationDuration);
 			// 	_inputBlocked = false;
 			// 	Debug.Log("{nameof(Game)}: Pop Sequence completed");
 			// }
@@ -94,17 +86,20 @@ namespace Client
 				{
 					//TODO: need to animate both popping and movement at once
 					//pop animation
-					await _boardView.PopIcons(solution, _config.PopAnimationDuration);
+					var sequence = _boardView.GetPopIconsSequence(solution, _config.PopAnimationDuration);
 					//replace popped with new ones
-					_board.FillBoard(_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig));
+					_board.FillBoard(_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig, out var movements));
 					//and animate movement
-
+					sequence.Join(_boardView.GetMoveIconsSequence(movements, RowOffset, _config.FillAnimationDuration));
+					await sequence.Play().AsyncWaitForCompletion();
 					//keep trying until stable
 					while (TryGetTotalSolution(_board, out solution))
 					{
-						await _boardView.PopIcons(solution, _config.PopAnimationDuration);
-						_board.FillBoard(
-							_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig));
+						var loopSequence = DOTween.Sequence();
+						loopSequence.Join(_boardView.GetPopIconsSequence(solution, _config.PopAnimationDuration));
+						_board.FillBoard(_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig, out movements));
+						loopSequence.Join(_boardView.GetMoveIconsSequence(movements, RowOffset, _config.FillAnimationDuration));
+						await loopSequence.Play().AsyncWaitForCompletion();
 					}
 				}
 				else

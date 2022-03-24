@@ -50,6 +50,8 @@ namespace Client
 			//swap icons according to new configs
 			cell1.UpdateIconFromConfig();
 			cell2.UpdateIconFromConfig();
+			cell1.UpdatePopIconFromConfig();
+			cell2.UpdatePopIconFromConfig();
 		}
 	}
 }
