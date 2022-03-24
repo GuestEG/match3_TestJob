@@ -1,19 +1,17 @@
 namespace Rules
 {
-	using System.Collections.Generic;
 	using Client;
 	using UnityEngine;
 
 	[CreateAssetMenu(menuName = "SWG/RecursiveSolverVertical")]
-	public sealed class RecursiveSolverVertical : SolutionRuleBase
+	public sealed class RecursiveSolverVertical : RecursiveLineSolver
 	{
-		[SerializeField] private int minimalChainLength = 3;
-
-		private Cell[,] _boardCells;
-
-		public override bool TryGetConnectedCells(Board board, Vector2Int cellCoords, out List<Cell> connectedCells)
+		private protected override Cell[] Neighbours(Board board, Vector2Int cellCoords)
 		{
-			throw new System.NotImplementedException();
+			var result = new Cell[2];
+			result[0] = Top(board, cellCoords);
+			result[1] = Bottom(board, cellCoords);
+			return result;
 		}
 	}
 }

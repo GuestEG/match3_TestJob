@@ -17,30 +17,33 @@ namespace Rules
 
 		public override bool TryGetConnectedCells(Board board, Vector2Int cellCoords, out List<Cell> connectedCells)
 		{
-			//immdiately return on empty cell
+			//immediately return on empty cell
 			if (board.GetCell(cellCoords).IsEmpty)
 			{
 				connectedCells = null;
 				return false;
 			}
 
+			connectedCells = new List<Cell>();
+			var result = false;
+
 			_connectedHorizontal = GetChainHorizontal(board, cellCoords);
-			if (_connectedHorizontal.Count < minimalChainLength)
+			if (_connectedHorizontal.Count >= minimalChainLength)
 			{
-				connectedCells = null;
-				return false;
+				//note: boxing
+				connectedCells = connectedCells.Union(_connectedHorizontal).ToList();
+				result = true;
 			}
 
 			_connectedVertical = GetChainVertical(board, cellCoords);
-			if (_connectedVertical.Count < minimalChainLength)
+			if (_connectedVertical.Count >= minimalChainLength)
 			{
-				connectedCells = _connectedHorizontal;
-				return true;
+				//note: boxing
+				connectedCells = connectedCells.Union(_connectedVertical).ToList();
+				result = true;
 			}
 
-			//TODO: get rid of boxing
-			connectedCells = _connectedHorizontal.Union(_connectedVertical).ToList();
-			return true;
+			return result;
 		}
 
 		private List<Cell> GetChainVertical(Board board, Vector2Int cellCoords)

@@ -1,6 +1,7 @@
 namespace Views
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Client;
     using Configs;
@@ -68,6 +69,23 @@ namespace Views
         {
             var cell = _cellViews[cellPosition.x, cellPosition.y];
             cell.ShowHighlight(show);
+        }
+
+        public async Task PopIcons(List<Cell> cells, float duration)
+        {
+            var sequence = DOTween.Sequence();
+            var sequence2 = DOTween.Sequence();
+            foreach (var cell in cells)
+            {
+                var cellView = _cellViews[cell.Coords.x, cell.Coords.y];
+                var icon = cellView.Icon;
+                sequence.Join(icon.transform.DOScale(2, duration / 2));
+                sequence2.Join(icon.transform.DOScale(1, duration / 2));
+            }
+
+            sequence.Append(sequence2);
+
+            await sequence.Play().AsyncWaitForCompletion();
         }
     }
 }
