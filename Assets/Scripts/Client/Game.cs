@@ -85,13 +85,13 @@ namespace Client
 
 				foreach (var solutionRule in _config.SolutionRules)
 				{
-					if (solutionRule.TryGetConnectedCells(_board, _selection.Coords, out var solution1))
+					if (solutionRule.TryGetConnectedCells(_board.Cells, _selection.Coords, out var solution1))
 					{
 						fullSolution = fullSolution.Union(solution1).ToList();
 						haveSolution = true;
 					}
 
-					if (solutionRule.TryGetConnectedCells(_board, cellPosition, out var solution2))
+					if (solutionRule.TryGetConnectedCells(_board.Cells, cellPosition, out var solution2))
 					{
 						fullSolution = fullSolution.Union(solution2).ToList();
 						haveSolution = true;

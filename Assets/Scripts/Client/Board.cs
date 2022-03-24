@@ -10,6 +10,8 @@ namespace Client
 
 		private Cell[,] _cells;
 
+		public Cell[,] Cells => _cells; //property maybe?
+
 		public Vector2Int Size => _config.BoardSize;
 		public Board(BoardConfig config)
 		{
@@ -20,6 +22,12 @@ namespace Client
 
 		public void FillBoard(Cell[,] cells)
 		{
+			if (cells.GetLength(0) != _config.BoardSize.x ||
+			    cells.GetLength(1) != _config.BoardSize.y)
+			{
+				Debug.LogError($"{nameof(Board)}: provided cells are not the same size as the board configuration!");
+				return;
+			}
 			_cells = cells;
 		}
 
