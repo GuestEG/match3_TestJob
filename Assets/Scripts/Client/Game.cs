@@ -11,16 +11,19 @@ namespace Client
 	{
 		private readonly GameConfig _config;
 		private readonly BoardView _boardView;
+		private readonly ScoreView _scoreView;
 		
 		private bool _inputBlocked = false;
-		private Board _board;
+		private Board _board = null;
 		private Cell _selection = null;
+		private int _gameScore = 0;
 		private float RowOffset => _boardView.GetRowHeight();
 
-		public Game(BoardView boardView, GameConfig config)
+		public Game(BoardView boardView, ScoreView scoreView, GameConfig config)
 		{
 			_config = config;
 			_boardView = boardView;
+			_scoreView = scoreView;
 			_boardView.SetConfig(config.BoardConfig);
 		}
 
@@ -28,6 +31,7 @@ namespace Client
 		{
 			_board = _config.BoardFillRule.FillBoard(_config);
 			FillBoardView();
+			_scoreView.SetScore(_gameScore);
 		}
 
 		private void FillBoardView()
@@ -42,17 +46,7 @@ namespace Client
 				return;
 			}
 
-			Debug.Log($"{nameof(Game)}: Clicked in coords {cellPosition}");
-
-			// //try to solve there
-			// if (_config.SolutionRules.TryGetConnectedCells(_board, cellPosition, out var solution))
-			// {
-			// 	_inputBlocked = true;
-			// 	await _boardView.GetPopIconsSequence(solution, _config.PopAnimationDuration);
-			// 	_inputBlocked = false;
-			// 	Debug.Log("{nameof(Game)}: Pop Sequence completed");
-			// }
-			// return;
+			// Debug.Log($"{nameof(Game)}: Clicked in coords {cellPosition}");
 
 			//new selection
 			if (_selection == null)
@@ -84,7 +78,10 @@ namespace Client
 				var haveSolution = TryGetSelectedSolution(cellPosition, out var solution);
 				if (haveSolution)
 				{
-					//TODO: need to animate both popping and movement at once
+					//score
+					_gameScore += _config.ScoringRule.GetScoreForSolution(solution);
+					_scoreView.SetScore(_gameScore);
+
 					//pop animation
 					var sequence = _boardView.GetPopIconsSequence(solution, _config.PopAnimationDuration);
 					//replace popped with new ones
@@ -95,6 +92,9 @@ namespace Client
 					//keep trying until stable
 					while (TryGetTotalSolution(_board, out solution))
 					{
+						_gameScore += _config.ScoringRule.GetScoreForSolution(solution);
+						_scoreView.SetScore(_gameScore);
+
 						var loopSequence = DOTween.Sequence();
 						loopSequence.Join(_boardView.GetPopIconsSequence(solution, _config.PopAnimationDuration));
 						_board.FillBoard(_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig, out movements));

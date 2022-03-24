@@ -13,7 +13,7 @@ namespace Rules
 		public int Distance;
 	}
 
-	[CreateAssetMenu(menuName = "SWG/BoardMovementRule")]
+	[CreateAssetMenu(menuName = "Match3Test/BoardMovementRule")]
 	public sealed class BoardMovementRule : ScriptableObject
 	{
 		public Cell[,] FIllHoles(Cell[,] board, List<Cell> removedCells, BoardConfig config, out List<CellMovement> movements)

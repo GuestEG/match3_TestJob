@@ -5,7 +5,7 @@ namespace Rules
 	using Client;
 	using UnityEngine;
 
-	[CreateAssetMenu(menuName = "SWG/CrossSolverRule")]
+	[CreateAssetMenu(menuName = "Match3Test/CrossSolverRule")]
 	public sealed class CrossSolver : SolutionRuleBase
 	{
 		[SerializeField] private int minimalChainLength = 3;

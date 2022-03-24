@@ -4,7 +4,7 @@ namespace Configs
     using Rules;
     using UnityEngine;
     
-    [CreateAssetMenu(menuName = "SWG/GameConfig")]
+    [CreateAssetMenu(menuName = "Match3Test/GameConfig")]
     public sealed class GameConfig : ScriptableObject
     {
         public float SwapAnimationDuration = 0.25f;
@@ -17,6 +17,7 @@ namespace Configs
         [Header("Rules")]
         public BoardFillRuleBase BoardFillRule;
         public BoardMovementRule BoardMovementRule;
+        public ScoringRule ScoringRule;
         public List<SolutionRuleBase> SolutionRules;
     }
 }

@@ -3,7 +3,7 @@ namespace Rules
 	using Client;
 	using UnityEngine;
 
-	[CreateAssetMenu(menuName = "SWG/RecursiveSolverHorizontal")]
+	[CreateAssetMenu(menuName = "Match3Test/RecursiveSolverHorizontal")]
 	public sealed class RecursiveSolverHorizontal : RecursiveLineSolver
 	{
 		private protected override Cell[] Neighbours(Cell[,] board, Vector2Int cellCoords)

@@ -5,7 +5,7 @@ namespace Rules
 	using UnityEngine;
 	using Random = UnityEngine.Random;
 
-	[CreateAssetMenu(menuName = "SWG/SimpleBoardFillRule")]
+	[CreateAssetMenu(menuName = "Match3Test/SimpleBoardFillRule")]
 	
 	// Just a random cell fill, no checks
 	public sealed class SimpleBoardFillRule : BoardFillRuleBase
