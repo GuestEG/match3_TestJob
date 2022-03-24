@@ -7,17 +7,11 @@ namespace Rules
 
 	[CreateAssetMenu(menuName = "SWG/NoPopsFillRule")]
 	
-	//This rule tries to generate random field until there is no immediate solution
-	//WARNING: does not use match rules from the game!
-	//requires refactoring of the solvers to work without Board class
-	
+	//This rule generates random board with no immediate solution
 	public sealed class NoPopsFillRule : BoardFillRuleBase
 	{
 		public override Board FillBoard(GameConfig gameConfig)
 		{
-			var cycleNum = 0;
-
-
 			var boardConfig = gameConfig.BoardConfig;
 			var solutionRules = gameConfig.SolutionRules;
 
@@ -33,6 +27,7 @@ namespace Rules
 			{
 				var rndX = Random.Range(0, sizeX);
 				var rndY = Random.Range(0, sizeY);
+
 				if (cells[rndX, rndY] == null)
 				{
 					var cell = new Cell();
@@ -41,7 +36,6 @@ namespace Rules
 					emptyCells--;
 				}
 			}
-
 			
 			for (int y = 0; y < sizeY; y++)
 			{
@@ -54,34 +48,33 @@ namespace Rules
 					}
 
 					//generate
+					var cell = new Cell();
 					CellConfig randomCellConfig = null;
 
+					bool haveSolution;
 					var cycles = 0;
-
-					//check 2 previous cells to the X and Y to not be the same - get rid of matches there
 					do
 					{
-						Debug.Log($"{nameof(NoPopsFillRule)}: Gen cycle = {cycles}");
+						// Debug.Log($"{nameof(NoPopsFillRule)}: Gen cycle = {cycles}");
 						randomCellConfig = boardConfig.CellConfigs[Random.Range(0, boardConfig.CellConfigs.Count)];
 						cycles++;
 						if (cycles > 10000)
 						{
-							Debug.Log($"{nameof(NoPopsFillRule)}: Aborting generation!");
+							Debug.LogError($"{nameof(NoPopsFillRule)}: Aborting board fill on gen {cycles}!");
 							break;
 						}
-					} while (x >= 2 &&
-					         cells[x - 1, y].Config == randomCellConfig &&
-					         cells[x - 2, y].Config == randomCellConfig
-					         ||
-					         y >= 2 &&
-					         cells[x, y - 1].Config == randomCellConfig &&
-					         cells[x, y - 2].Config == randomCellConfig);
 
-					var cell = new Cell();
-					cell.Config = randomCellConfig;
-					cell.Coords = new Vector2Int(x, y);
-					
-					cells[x, y] = cell;
+						cell.Config = randomCellConfig;
+						cell.Coords = new Vector2Int(x, y);
+						cells[x, y] = cell;
+
+						haveSolution = false;
+						foreach (var solver in solutionRules)
+						{
+							haveSolution |= solver.TryGetConnectedCells(cells, cell.Coords, out _);
+						}
+					}
+					while (haveSolution);
 				}
 			}
 			
