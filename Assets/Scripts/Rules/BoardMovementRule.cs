@@ -32,12 +32,14 @@ namespace Rules
 			movements = new List<CellMovement>();
 
 			//work with one column from left to right
-			for (int column = 0; column < columnsNum; column++)
+			// for (int column = 0; column < columnsNum; column++)
+			for (int row = 0; row < rowsNum; row++)
 			{
-				var columnBottom = 0;
 				//check every row from top
-				for (int row = 0; row < rowsNum; row++)
+				// for (int row = 0; row < rowsNum; row++)
+				for (int column = 0; column < columnsNum; column++)
 				{
+					// var columnBottom = 0;
 					ref var boardCell = ref board[column, row];
 					var moves = new List<Move>();
 					var lookupOffset = 0;
@@ -56,9 +58,6 @@ namespace Rules
 
 							nextCell = board[column + lookupOffset, lookupRow];
 
-							move.End = nextCell.Coords;
-							moves.Add(move);
-							
 							if (removedCells.Contains(nextCell))
 							{
 								continue;
@@ -80,6 +79,10 @@ namespace Rules
 								lookupRow--;
 								continue;
 							}
+
+							//do not add holes to moves!
+							move.End = nextCell.Coords;
+							moves.Add(move);
 
 							//we found the piece, now we need to put it in the missing spot
 							//board[column, row].Config = nextCell.Config;
@@ -108,7 +111,8 @@ namespace Rules
 							boardCell.Config = randomCellConfig;
 							boardCell.UpdateIconFromConfig();
 
-							columnBottom = Mathf.Max(columnBottom, rowsNum - boardCell.Coords.y);
+							// columnBottom = Mathf.Max(columnBottom, rowsNum - boardCell.Coords.y);
+							var columnBottom =  rowsNum - boardCell.Coords.y;
 
 							moves.Add(new Move()
 							{
