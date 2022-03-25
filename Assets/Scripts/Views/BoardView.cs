@@ -107,25 +107,35 @@ namespace Views
             var sequence = DOTween.Sequence();
             foreach (var movement in movements)
             {
-                var targetCell = _cellViews[movement.End.x, movement.End.y];
+                var targetCell = _cellViews[movement.Target.x, movement.Target.y];
                 var targetIcon = targetCell.Icon;
 
-                Vector3 startPosition;
-                if (movement.FromOffscreen)
+                var moveSequence = DOTween.Sequence();
+                foreach (var move in movement.Moves)
                 {
-                    //take offscreen position
-                    startPosition = targetIcon.transform.position 
-                                    + Vector3.down * rowOffset * movement.Distance
-                                    + Vector3.right * movement.Start.x;
-                }
-                else
-                {
-                    var sourceCell = _cellViews[movement.Start.x, movement.Start.y];
-                    startPosition = sourceCell.Icon.transform.position;
-                }
+                    
+                    Vector3 startPosition;
+                    Vector3 endPosition = _cellViews[move.End.x, move.End.y].transform.position;
+                    if (move.FromOffscreen)
+                    {
+                        //take offscreen position
+                        startPosition = targetIcon.transform.position
+                                        + Vector3.down * rowOffset * movement.Distance
+                                        + Vector3.right * move.Start.x;
+                        
+                    }
+                    else
+                    {
+                        var sourceCell = _cellViews[move.Start.x, move.Start.y];
+                        startPosition = sourceCell.Icon.transform.position;
+                    }
 
-                //reverse move
-                sequence.Join(targetIcon.transform.DOMove(startPosition, duration * movement.Distance).From());
+                    //reverse move
+                    moveSequence.PrependCallback(() => targetIcon.transform.position = endPosition);
+                    moveSequence.Append(targetIcon.transform.DOMove(startPosition, duration * movement.Distance).From());
+                    
+                }
+                sequence.Join(moveSequence);
             }
 
             return sequence;

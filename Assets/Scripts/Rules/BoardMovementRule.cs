@@ -1,15 +1,23 @@
 namespace Rules
 {
+	using System;
 	using System.Collections.Generic;
 	using Client;
 	using Configs;
 	using UnityEngine;
+	using Random = UnityEngine.Random;
+
+	public sealed class Move
+	{
+		public Vector2Int Start;
+		public Vector2Int End;
+		public bool FromOffscreen = false;
+	}
 
 	public sealed class CellMovement
 	{
-		public bool FromOffscreen = false;
-		public Vector2Int Start;
-		public Vector2Int End;
+		public Vector2Int Target;
+		public List<Move> Moves;
 		public int Distance;
 	}
 
@@ -31,15 +39,26 @@ namespace Rules
 				for (int row = 0; row < rowsNum; row++)
 				{
 					ref var boardCell = ref board[column, row];
+					var moves = new List<Move>();
 					var lookupOffset = 0;
 					//find a row where a missing piece will be
 					if (!boardCell.IsHole && removedCells.Contains(boardCell))
 					{
 						var filled = false;
 						//now scan downwards until hit a filled or end of the board
+						Cell nextCell = boardCell;
 						for (int lookupRow = row + 1; lookupRow < rowsNum; lookupRow++)
 						{
-							var nextCell = board[column + lookupOffset, lookupRow];
+							var move = new Move
+							{
+								Start = nextCell.Coords
+							};
+
+							nextCell = board[column + lookupOffset, lookupRow];
+
+							move.End = nextCell.Coords;
+							moves.Add(move);
+							
 							if (removedCells.Contains(nextCell))
 							{
 								continue;
@@ -73,10 +92,9 @@ namespace Rules
 							//create movement for animation
 							var movement = new CellMovement()
 							{
-								End = boardCell.Coords,
-								Start = nextCell.Coords,
+								Target = boardCell.Coords,
+								Moves = moves,
 								Distance = nextCell.Coords.y - boardCell.Coords.y + nextCell.Coords.x - boardCell.Coords.x
-								
 							};
 							movements.Add(movement);
 
@@ -92,20 +110,25 @@ namespace Rules
 
 							columnBottom = Mathf.Max(columnBottom, rowsNum - boardCell.Coords.y);
 
+							moves.Add(new Move()
+							{
+								End = nextCell.Coords,
+								Start = Vector2Int.right * lookupOffset, //offset
+								FromOffscreen = true
+							});
 							//create movement for animation
 							var movement = new CellMovement()
 							{
-								End = boardCell.Coords,
+								Target = boardCell.Coords,
 								Distance = columnBottom,
-								Start = Vector2Int.right * lookupOffset,
-								FromOffscreen = true
+								Moves = moves
 							};
 							movements.Add(movement);
 						}
 					}
 				}
 			}
-
+			movements.Reverse();
 			return board;
 		}
 	}
