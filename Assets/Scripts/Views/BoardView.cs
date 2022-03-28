@@ -102,40 +102,74 @@ namespace Views
             return sequence;
         }
 
-        public Sequence GetMoveIconsSequence(List<CellMovement> movements, float rowOffset, float duration)
+        public Sequence GetMoveIconsSequence(List<CellMovement> movements, float rowOffset, float columnOffset, float duration)
         {
             var sequence = DOTween.Sequence();
             foreach (var movement in movements)
             {
                 var targetCell = _cellViews[movement.Target.x, movement.Target.y];
                 var targetIcon = targetCell.Icon;
+                var movesCount = movement.Moves.Count;
+                Vector3[] positions = new Vector3[movesCount + 1];
+                //first position = end 
+                positions[movesCount] = targetIcon.transform.position;
 
-                var moveSequence = DOTween.Sequence();
-                foreach (var move in movement.Moves)
+                for (int i = 0; i < movesCount; i++)
                 {
-                    
-                    Vector3 startPosition;
-                    Vector3 endPosition = _cellViews[move.End.x, move.End.y].transform.position;
+                    //reverse
+                    var move = movement.Moves[movesCount - 1 - i];
                     if (move.FromOffscreen)
                     {
                         //take offscreen position
-                        startPosition = targetIcon.transform.position
-                                        + Vector3.down * rowOffset * movement.Distance
-                                        + Vector3.right * move.Start.x;
+                        positions[i] = targetIcon.transform.position
+                                    + Vector3.down * rowOffset * move.RowOffset
+                                    + Vector3.right * columnOffset * move.Column;
                         
                     }
                     else
                     {
-                        var sourceCell = _cellViews[move.Start.x, move.Start.y];
-                        startPosition = sourceCell.Icon.transform.position;
+                        var sourceCell = _cellViews[move.Coords.x, move.Coords.y];
+                        positions[i] = sourceCell.Icon.transform.position;
                     }
-
-                    //reverse move
-                    moveSequence.PrependCallback(() => targetIcon.transform.position = endPosition);
-                    moveSequence.Append(targetIcon.transform.DOMove(startPosition, duration * movement.Distance).From());
-                    
                 }
-                sequence.Join(moveSequence);
+
+                //put icon in starting position immediately
+                targetIcon.transform.position = positions[0];
+
+                sequence.Join(
+                    targetIcon.transform
+                        .DOPath(
+                            path: positions, 
+                            duration:duration * movesCount,
+                            pathMode: PathMode.Ignore)
+                    );
+                // var moveSequence = DOTween.Sequence();
+                // var Vector3
+                // foreach (var move in movement.Moves)
+                // {
+                //     
+                //     // Vector3 startPosition;
+                //     // Vector3 endPosition = _cellViews[move.End.x, move.End.y].transform.position;
+                //     if (move.FromOffscreen)
+                //     {
+                //         //take offscreen position
+                //         startPosition = targetIcon.transform.position
+                //                         + Vector3.down * rowOffset * movement.Distance
+                //                         + Vector3.right * move.Start.x;
+                //         
+                //     }
+                //     else
+                //     {
+                //         var sourceCell = _cellViews[move.Start.x, move.Start.y];
+                //         startPosition = sourceCell.Icon.transform.position;
+                //     }
+                //
+                //     //reverse move
+                //     moveSequence.PrependCallback(() => targetIcon.transform.position = endPosition);
+                //     moveSequence.Append(targetIcon.transform.DOMove(startPosition, duration * movement.Distance).From());
+                //     
+                // }
+                // sequence.Join(moveSequence);
             }
 
             return sequence;
@@ -147,6 +181,13 @@ namespace Views
             var row0 = _rows[0].transform;
             var row1 = _rows[1].transform;
             return Mathf.Abs(row0.position.y - row1.position.y);
+        }
+
+        public float GetColumnWidth()
+        {
+            var cell0 = _cellViews[0,0].transform;
+            var cell1 = _cellViews[1,0].transform;
+            return Mathf.Abs(cell0.position.x - cell1.position.x);
         }
     }
 }

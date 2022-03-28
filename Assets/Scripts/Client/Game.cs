@@ -22,6 +22,7 @@ namespace Client
 		private int _gameScore = 0;
 
 		private float RowOffset => _boardView.GetRowHeight();
+		private float ColumnOffset => _boardView.GetColumnWidth();
 
 		public Game(BoardView boardView, ScoreView scoreView, ShufflePopup shufflePopup, GameConfig config)
 		{
@@ -95,7 +96,7 @@ namespace Client
 
 					//and animate movement
 					sequence.Join(
-						_boardView.GetMoveIconsSequence(movements, RowOffset, _config.FillAnimationDuration));
+						_boardView.GetMoveIconsSequence(movements, RowOffset, ColumnOffset, _config.FillAnimationDuration));
 					await sequence
 						.Play()
 						.AsyncWaitForCompletion();
@@ -111,7 +112,7 @@ namespace Client
 						_board.FillBoard(
 							_config.BoardMovementRule.FIllHoles(_board.Cells, solution, _config.BoardConfig, out movements));
 						loopSequence.Join(
-							_boardView.GetMoveIconsSequence(movements, RowOffset, _config.FillAnimationDuration));
+							_boardView.GetMoveIconsSequence(movements, RowOffset, ColumnOffset, _config.FillAnimationDuration));
 						await loopSequence
 							.Play()
 							.AsyncWaitForCompletion();
