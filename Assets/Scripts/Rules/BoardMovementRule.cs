@@ -9,16 +9,18 @@ namespace Rules
 
 	public sealed class Move
 	{
-		public Vector2Int Start;
-		public Vector2Int End;
+		public Vector2Int Coords;
+		//todo: split in different class
 		public bool FromOffscreen = false;
+		public int Column;
+		public int RowOffset;
 	}
 
 	public sealed class CellMovement
 	{
 		public Vector2Int Target;
 		public List<Move> Moves;
-		public int Distance;
+		// public int Distance;
 	}
 
 	[CreateAssetMenu(menuName = "Match3Test/BoardMovementRule")]
@@ -43,26 +45,25 @@ namespace Rules
 					ref var boardCell = ref board[column, row];
 					var moves = new List<Move>();
 					var lookupOffset = 0;
-					//find a row where a missing piece will be
+					
 					if (!boardCell.IsHole && removedCells.Contains(boardCell))
 					{
+						//found destroyed cell, now find replacement and record every point
 						var filled = false;
-						//now scan downwards until hit a filled or end of the board
-						Cell nextCell = boardCell;
+
+						//create movement for animation
+						var movement = new CellMovement()
+						{
+							Target = boardCell.Coords,
+							Moves = new List<Move>(),
+							// Distance = nextCell.Coords.y - boardCell.Coords.y + nextCell.Coords.x - boardCell.Coords.x
+						};
+
+						Cell nextCell = null;
 						for (int lookupRow = row + 1; lookupRow < rowsNum; lookupRow++)
 						{
-							var move = new Move
-							{
-								Start = nextCell.Coords
-							};
-
 							nextCell = board[column + lookupOffset, lookupRow];
-
-							if (removedCells.Contains(nextCell))
-							{
-								continue;
-							}
-
+							
 							if (nextCell.IsHole)
 							{
 								//shift lookup sideways
@@ -75,30 +76,33 @@ namespace Rules
 									lookupOffset--;
 								}
 
-								//step back
+								//step back to try again
 								lookupRow--;
 								continue;
 							}
 
-							//do not add holes to moves!
-							move.End = nextCell.Coords;
-							moves.Add(move);
+							if (removedCells.Contains(nextCell))
+							{
+								//record middle point
+								movement.Moves.Add(new Move
+								{
+									Coords = nextCell.Coords
+								});
+								continue;
+							}
 
-							//we found the piece, now we need to put it in the missing spot
 							//board[column, row].Config = nextCell.Config;
 							boardCell.Config = nextCell.Config;
 							//and that cell becomes empty
+							removedCells.Remove(boardCell);
 							removedCells.Add(nextCell);
 							boardCell.UpdateIconFromConfig();
 							filled = true;
 
-							//create movement for animation
-							var movement = new CellMovement()
+							movement.Moves.Add(new Move
 							{
-								Target = boardCell.Coords,
-								Moves = moves,
-								Distance = nextCell.Coords.y - boardCell.Coords.y + nextCell.Coords.x - boardCell.Coords.x
-							};
+								Coords = nextCell.Coords
+							});
 							movements.Add(movement);
 
 							break;
@@ -116,23 +120,24 @@ namespace Rules
 
 							moves.Add(new Move()
 							{
-								End = nextCell.Coords,
-								Start = Vector2Int.right * lookupOffset, //offset
-								FromOffscreen = true
+								FromOffscreen = true,
+								Column = columnBottom,
+								RowOffset = lookupOffset
+								
 							});
 							//create movement for animation
-							var movement = new CellMovement()
-							{
-								Target = boardCell.Coords,
-								Distance = columnBottom,
-								Moves = moves
-							};
+							// var movement = new CellMovement()
+							// {
+							// 	Target = boardCell.Coords,
+							// 	Distance = columnBottom,
+							// 	Moves = moves
+							// };
 							movements.Add(movement);
 						}
 					}
 				}
 			}
-			movements.Reverse();
+			
 			return board;
 		}
 	}
